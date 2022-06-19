@@ -1,4 +1,5 @@
 const { ethers } = require('hardhat')
+require('../utils/prototypes')
 
 const { CONTRACT_ADDRESS, CONTRACT_NAME, CONTRACT_BLOCK_DEPLOYED } = require('../app.config')
 
@@ -52,36 +53,16 @@ async function main () {
     console.log('-'.repeat(112))
 
     for (const historyEntry of history) {
-        const requestId = historyEntry.requestId.toString().ellipsis(7, 3)
+        const requestId = historyEntry.requestId.toString().ellipsify(7, 3)
         const requestDate = new Date(historyEntry.requestTimestamp * 1000).toNiceString()
         const responseDate = historyEntry.responseTimestamp ? new Date(historyEntry.responseTimestamp * 1000).toNiceString() : ''.padEnd(19)
         const requestBlockNumber = historyEntry.requestBlockNumber.toString().padEnd(8)
         const responseBlockNumber = historyEntry.responseBlockNumber?.toString().padEnd(8) ?? ''.padEnd(8)
-        const requestorAddress = historyEntry.requestorAddress.ellipsis(8, 3)
-        const randomNumber = historyEntry.randomNumber?.toString().ellipsis(7, 3) ?? ''
+        const requestorAddress = historyEntry.requestorAddress.ellipsify(8, 3)
+        const randomNumber = historyEntry.randomNumber?.toString().ellipsify(7, 3) ?? ''
         
         console.log(`${requestId}   ${requestDate}   ${responseDate}   ${requestBlockNumber}   ${responseBlockNumber}   ${requestorAddress}   ${randomNumber}`)
     }
-}
-
-String.prototype.ellipsis = function (startLength, endLength) {
-
-    if (startLength + endLength >= this.length) {
-
-        return String(this)
-    }
-
-    return (this.substring(0, startLength) + '...' + this.substring(this.length - endLength))
-}
-
-Date.prototype.toNiceString = function () {
-    
-    const YYYY = this.getFullYear().toString()
-    const MM = (this.getMonth() + 1).toString().padStart(2, 0)
-    const DD = this.getDate().toString().padStart(2, 0)
-    const time = this.toTimeString().substring(0, 8)
-        
-    return `${YYYY}-${MM}-${DD} ${time}`
 }
 
 main()
