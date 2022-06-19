@@ -23,10 +23,13 @@ async function main () {
     for (const requestsLogEntry of requestsLog) {
         const parsedRequestsLogEntry = RandomnessLogger.interface.parseLog(requestsLogEntry)
 
-        const requestBlockNumber = requestsLogEntry.blockNumber
-        const requestTimestamp = parsedRequestsLogEntry.args.timestamp
-        const requestId = parsedRequestsLogEntry.args.requestId
-        const requestorAddress = parsedRequestsLogEntry.args.requestorAddress
+        const historyEntry = {
+            requestBlockNumber: requestsLogEntry.blockNumber,
+            requestTimestamp: parsedRequestsLogEntry.args.timestamp,
+            requestId: parsedRequestsLogEntry.args.requestId,
+            requestorAddress: parsedRequestsLogEntry.args.requestorAddress,
+        }
+        
         let responseBlockNumber, responseTimestamp, randomNumber
 
         // search through responses log array, parse it, match with requests array on requestId and assign values
@@ -34,23 +37,15 @@ async function main () {
             const parsedResponsesLogEntry = RandomnessLogger.interface.parseLog(responsesLogEntry)
 
             if (parsedResponsesLogEntry.args.requestId.toString() === parsedRequestsLogEntry.args.requestId.toString()) {
-                responseBlockNumber = responsesLogEntry.blockNumber
-                responseTimestamp = parsedResponsesLogEntry.args.timestamp
-                randomNumber = parsedResponsesLogEntry.args.randomNumber
+                historyEntry.responseBlockNumber = responsesLogEntry.blockNumber
+                historyEntry.responseTimestamp = parsedResponsesLogEntry.args.timestamp
+                historyEntry.randomNumber = parsedResponsesLogEntry.args.randomNumber
 
                 break
             }
         }
 
-        history.push({
-            requestBlockNumber,
-            requestTimestamp,
-            requestId,
-            requestorAddress,
-            responseBlockNumber,
-            responseTimestamp,
-            randomNumber,
-        })
+        history.push(historyEntry)
     }
 
     console.log('REQUEST ID      REQUEST DATE          RESPONSE DATE         REQ BLK    RESP BLK   REQUESTOR ADDR   RANDOM NUMBER')
