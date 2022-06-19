@@ -53,8 +53,8 @@ async function main () {
 
     for (const historyEntry of history) {
         const requestId = historyEntry.requestId.toString().ellipsis(7, 3)
-        const requestDate = new Date(historyEntry.requestTimestamp * 1000).formatUtc()
-        const responseDate = historyEntry.responseTimestamp ? new Date(historyEntry.responseTimestamp * 1000).formatUtc() : ''.padEnd(19)
+        const requestDate = new Date(historyEntry.requestTimestamp * 1000).toNiceString()
+        const responseDate = historyEntry.responseTimestamp ? new Date(historyEntry.responseTimestamp * 1000).toNiceString() : ''.padEnd(19)
         const requestBlockNumber = historyEntry.requestBlockNumber.toString().padEnd(8)
         const responseBlockNumber = historyEntry.responseBlockNumber?.toString().padEnd(8) ?? ''.padEnd(8)
         const requestorAddress = historyEntry.requestorAddress.ellipsis(8, 3)
@@ -74,9 +74,14 @@ String.prototype.ellipsis = function (startLength, endLength) {
     return (this.substring(0, startLength) + '...' + this.substring(this.length - endLength))
 }
 
-Date.prototype.formatUtc = function () {
+Date.prototype.toNiceString = function () {
     
-    return this.toISOString().slice(0, 19).replace('T', ' ')
+    const YYYY = this.getFullYear().toString()
+    const MM = (this.getMonth() + 1).toString().padStart(2, 0)
+    const DD = this.getDate().toString().padStart(2, 0)
+    const time = this.toTimeString().substring(0, 8)
+        
+    return `${YYYY}-${MM}-${DD} ${time}`
 }
 
 main()
