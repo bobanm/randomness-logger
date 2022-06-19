@@ -11,9 +11,13 @@ async function main () {
     const filterResponses = RandomnessLogger.filters.NumberReceived()
     filterRequests.fromBlock = CONTRACT_BLOCK_DEPLOYED
     filterResponses.fromBlock = CONTRACT_BLOCK_DEPLOYED
+    
+    console.log('\nQuerying the blockchain, please wait...\n')
 
-    const requestsLog = await ethers.provider.getLogs(filterRequests)
-    const responsesLog = await ethers.provider.getLogs(filterResponses)
+    const [requestsLog, responsesLog] = await Promise.all([
+        ethers.provider.getLogs(filterRequests),
+        ethers.provider.getLogs(filterResponses),
+    ])
 
     // loop through requests log array, parse it and combine with responses array
     for (const requestsLogEntry of requestsLog) {
