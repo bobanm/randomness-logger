@@ -6,42 +6,78 @@ async function main () {
 
     const RandomnessLogger = await ethers.getContractAt(CONTRACT_NAME, CONTRACT_ADDRESS)
 
-    const requests = []
-    const filter = RandomnessLogger.filters.NumberRequested()
-    filter.fromBlock = CONTRACT_BLOCK_DEPLOYED
-    // filter.fromBlock = config.networks.hardhat.forking.blockNumber
-    const logs = await ethers.provider.getLogs(filter)
+    const history = []
+    const filterRequests = RandomnessLogger.filters.NumberRequested()
+    const filterResponses = RandomnessLogger.filters.NumberReceived()
+    filterRequests.fromBlock = CONTRACT_BLOCK_DEPLOYED
+    filterResponses.fromBlock = CONTRACT_BLOCK_DEPLOYED
 
-    for (const log of logs) {
-        const parsedLog = RandomnessLogger.interface.parseLog(log)
-        requests.push({
-            blockNumber: log.blockNumber,
-            date: (new Date(parsedLog.args.timestamp.toNumber() * 1000)).toISOString().slice(0, 19).replace('T', ' '),
-            requestId: parsedLog.args.requestId.toString(),
-            requestorAddress: parsedLog.args.requestorAddress,
+    const requestsLog = await ethers.provider.getLogs(filterRequests)
+    const responsesLog = await ethers.provider.getLogs(filterResponses)
+
+    // loop through requests log array, parse it and combine with responses array
+    for (const requestsLogEntry of requestsLog) {
+        const parsedRequestsLogEntry = RandomnessLogger.interface.parseLog(requestsLogEntry)
+
+        const requestBlockNumber = requestsLogEntry.blockNumber
+        const requestTimestamp = parsedRequestsLogEntry.args.timestamp
+        const requestId = parsedRequestsLogEntry.args.requestId
+        const requestorAddress = parsedRequestsLogEntry.args.requestorAddress
+        let responseBlockNumber, responseTimestamp, randomNumber
+
+        // search through responses log array, parse it, match with requests array on requestId and assign values
+        for (const responsesLogEntry of responsesLog) {
+            const parsedResponsesLogEntry = RandomnessLogger.interface.parseLog(responsesLogEntry)
+
+            if (parsedResponsesLogEntry.args.requestId.toString() === parsedRequestsLogEntry.args.requestId.toString()) {
+                responseBlockNumber = responsesLogEntry.blockNumber
+                responseTimestamp = parsedResponsesLogEntry.args.timestamp
+                randomNumber = parsedResponsesLogEntry.args.randomNumber
+
+                break
+            }
+        }
+
+        history.push({
+            requestBlockNumber,
+            requestTimestamp,
+            requestId,
+            requestorAddress,
+            responseBlockNumber,
+            responseTimestamp,
+            randomNumber,
         })
     }
 
-    console.log('REQUESTS')
-    console.log(requests)
+    console.log('REQUEST ID      REQUEST DATE          RESPONSE DATE         REQ BLK    RESP BLK   REQUESTOR ADDR   RANDOM NUMBER')
+    console.log('-'.repeat(112))
 
-    const responses = []
-    const filterResponse = RandomnessLogger.filters.NumberReceived()
-    filterResponse.fromBlock = CONTRACT_BLOCK_DEPLOYED
-    const logsResponse = await ethers.provider.getLogs(filterResponse)
+    for (const historyEntry of history) {
+        const requestId = historyEntry.requestId.toString().ellipsis(7, 3)
+        const requestDate = new Date(historyEntry.requestTimestamp * 1000).formatUtc()
+        const responseDate = historyEntry.responseTimestamp ? new Date(historyEntry.responseTimestamp * 1000).formatUtc() : ''.padEnd(19)
+        const requestBlockNumber = historyEntry.requestBlockNumber.toString().padEnd(8)
+        const responseBlockNumber = historyEntry.responseBlockNumber?.toString().padEnd(8) ?? ''.padEnd(8)
+        const requestorAddress = historyEntry.requestorAddress.ellipsis(8, 3)
+        const randomNumber = historyEntry.randomNumber?.toString().ellipsis(7, 3) ?? ''
+        
+        console.log(`${requestId}   ${requestDate}   ${responseDate}   ${requestBlockNumber}   ${responseBlockNumber}   ${requestorAddress}   ${randomNumber}`)
+    }
+}
 
-    for (const log of logsResponse) {
-        const parsedLog = RandomnessLogger.interface.parseLog(log)
-        responses.push({
-            blockNumber: log.blockNumber,
-            date: (new Date(parsedLog.args.timestamp.toNumber() * 1000)).toISOString().slice(0, 19).replace('T', ' '),
-            requestId: parsedLog.args.requestId.toString(),
-            randomNumber: parsedLog.args.randomNumber.toString(),
-        })
+String.prototype.ellipsis = function (startLength, endLength) {
+
+    if (startLength + endLength >= this.length) {
+
+        return String(this)
     }
 
-    console.log('RESPONSES')
-    console.log(responses)
+    return (this.substring(0, startLength) + '...' + this.substring(this.length - endLength))
+}
+
+Date.prototype.formatUtc = function () {
+    
+    return this.toISOString().slice(0, 19).replace('T', ' ')
 }
 
 main()
