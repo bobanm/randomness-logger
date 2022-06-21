@@ -1,6 +1,6 @@
-const { ethers } = require('hardhat')
+import { ethers } from 'hardhat'
 
-const { CONTRACT_NAME, CONTRACT_ADDRESS, CALLBACK_GAS_LIMIT } = require('../app.config')
+import { CONTRACT_NAME, CONTRACT_ADDRESS, CALLBACK_GAS_LIMIT } from '../app.config'
 
 async function main () {
 
@@ -8,6 +8,7 @@ async function main () {
     const RandomnessLogger = await ethers.getContractAt(CONTRACT_NAME, CONTRACT_ADDRESS, signer)
 
     const transaction = await RandomnessLogger.requestRandomNumbers(CALLBACK_GAS_LIMIT)
+    console.log('Requested random number. Waiting for the transaction to be mined...')
     const receipt = await transaction.wait()
     console.log(`Request ID = ${receipt.events[1].args.requestId}`)
 }

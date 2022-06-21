@@ -1,4 +1,5 @@
-const { CONTRACT_NAME, VRF_SUBSCRIPTION_ID } = require('../app.config')
+import { ethers } from 'hardhat'
+import { CONTRACT_NAME, VRF_SUBSCRIPTION_ID } from '../app.config'
 
 async function main () {
 

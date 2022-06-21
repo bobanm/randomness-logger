@@ -1,19 +1,20 @@
-require('@nomiclabs/hardhat-waffle')
-require('@nomiclabs/hardhat-etherscan')
+import '@nomiclabs/hardhat-waffle'
+import '@nomiclabs/hardhat-etherscan'
+import { HardhatUserConfig, task } from 'hardhat/config'
 
-const { generateInfuraUrl, generateAlchemyUrl } = require('./utils/generate-url')
-const { ALCHEMY_API_KEY, INFURA_API_KEY, PRIVATE_KEYS, ETHERSCAN_API_KEY } = require('./.credentials')
+import { generateInfuraUrl, generateAlchemyUrl } from './utils/generate-url'
+import { ALCHEMY_API_KEY, INFURA_API_KEY, PRIVATE_KEYS, ETHERSCAN_API_KEY } from './.credentials'
 
 task('balance', 'Prints an account balance')
     .addParam('address', 'The account address')
-    .setAction(async (args) => {
-        const balance = await ethers.provider.getBalance(args.address)
-        console.log(`${args.address} = ${ethers.utils.formatEther(balance)} ETH`)
+    .setAction(async (args, hre) => {
+        const balance = await hre.ethers.provider.getBalance(args.address)
+        console.log(`${args.address} = ${hre.ethers.utils.formatEther(balance)} ETH`)
     })
 
 task('balances', 'Prints balances of all configured accounts')
-    .setAction(async () => {
-        const accounts = await ethers.getSigners()
+    .setAction(async (args, hre) => {
+        const accounts = await hre.ethers.getSigners()
 
         if (!accounts.length) {
             console.log('No accounts detected. Configure them in your Hardhat config file.')
@@ -27,15 +28,15 @@ task('balances', 'Prints balances of all configured accounts')
             '-----------------------------------------------------------------'
         )
         for (const account of accounts) {
-            const balance = await ethers.provider.getBalance(account.address)
-            console.log(`${account.address}   ${ethers.utils.formatEther(balance)}`)
+            const balance = await hre.ethers.provider.getBalance(account.address)
+            console.log(`${account.address}   ${hre.ethers.utils.formatEther(balance)}`)
         }
     })
 
 task('deploy', 'Deploy a contract')
     .addParam('contract', 'Contract name')
-    .setAction(async (args) => {
-        const contractFactory = await ethers.getContractFactory(args.contract)
+    .setAction(async (args, hre) => {
+        const contractFactory = await hre.ethers.getContractFactory(args.contract)
         const contract = await contractFactory.deploy()
     
         console.log(`Deploying contract ${contract.address}\n` +
@@ -45,10 +46,7 @@ task('deploy', 'Deploy a contract')
         console.log('Contract successfully deployed');
     })
 
-/**
- * @type import('hardhat/config').HardhatUserConfig
- */
-module.exports = {
+const config: HardhatUserConfig = {
     solidity: '0.8.9',
     etherscan: {
         apiKey: ETHERSCAN_API_KEY,
@@ -102,3 +100,5 @@ module.exports = {
         },
     }
 }
+
+export default config

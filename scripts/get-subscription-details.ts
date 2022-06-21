@@ -1,6 +1,6 @@
-const { ethers } = require('hardhat')
+import { ethers } from 'hardhat'
 
-const { VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, VRF_SUBSCRIPTION_ID } = require('../app.config')
+import { VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, VRF_SUBSCRIPTION_ID } from '../app.config'
 
 async function main () {
 
