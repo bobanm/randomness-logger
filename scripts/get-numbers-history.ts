@@ -20,37 +20,32 @@ async function main () {
     const RandomnessLogger = await ethers.getContractAt(CONTRACT_NAME, CONTRACT_ADDRESS)
 
     const history: HistoryEntry[] = []
-    const filterRequests: any = RandomnessLogger.filters.NumberRequested()
-    const filterResponses: any = RandomnessLogger.filters.NumberReceived()
-    filterRequests.fromBlock = CONTRACT_BLOCK_DEPLOYED
-    filterResponses.fromBlock = CONTRACT_BLOCK_DEPLOYED
+    const filterRequests = RandomnessLogger.filters.NumberRequested()
+    const filterResponses = RandomnessLogger.filters.NumberReceived()
     
     console.log('\nQuerying the blockchain, please wait...\n')
 
     const [requestsLog, responsesLog] = await Promise.all([
-        ethers.provider.getLogs(filterRequests),
-        ethers.provider.getLogs(filterResponses),
+        RandomnessLogger.queryFilter(filterRequests, CONTRACT_BLOCK_DEPLOYED),
+        RandomnessLogger.queryFilter(filterResponses, CONTRACT_BLOCK_DEPLOYED),
     ])
 
-    // loop through requests log array, parse it and combine with responses array
     for (const requestsLogEntry of requestsLog) {
-        const parsedRequestsLogEntry = RandomnessLogger.interface.parseLog(requestsLogEntry)
 
         const historyEntry: HistoryEntry = {
             requestBlockNumber: requestsLogEntry.blockNumber,
-            requestTimestamp: parsedRequestsLogEntry.args.timestamp,
-            requestId: parsedRequestsLogEntry.args.requestId,
-            requestorAddress: parsedRequestsLogEntry.args.requestorAddress,
+            requestTimestamp: requestsLogEntry.args!.timestamp,
+            requestId: requestsLogEntry.args!.requestId,
+            requestorAddress: requestsLogEntry.args!.requestorAddress,
         }
         
-        // search through responses log array, parse it, match with requests array on requestId and assign values
+        // search through responses log array, match with requests array on requestId and assign missing values
         for (const responsesLogEntry of responsesLog) {
-            const parsedResponsesLogEntry = RandomnessLogger.interface.parseLog(responsesLogEntry)
 
-            if (parsedResponsesLogEntry.args.requestId.toString() === parsedRequestsLogEntry.args.requestId.toString()) {
+            if (responsesLogEntry.args!.requestId.toString() === requestsLogEntry.args!.requestId.toString()) {
                 historyEntry.responseBlockNumber = responsesLogEntry.blockNumber
-                historyEntry.responseTimestamp = parsedResponsesLogEntry.args.timestamp
-                historyEntry.randomNumber = parsedResponsesLogEntry.args.randomNumber
+                historyEntry.responseTimestamp = responsesLogEntry.args!.timestamp
+                historyEntry.randomNumber = responsesLogEntry.args!.randomNumber
 
                 break
             }
