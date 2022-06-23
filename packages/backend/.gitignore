@@ -1,0 +1,6 @@
+node_modules
+.credentials.*
+
+#Hardhat files
+cache
+artifacts

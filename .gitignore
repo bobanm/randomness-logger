@@ -1,8 +1,2 @@
 node_modules
-.env
 .vscode
-.credentials.*
-
-#Hardhat files
-cache
-artifacts

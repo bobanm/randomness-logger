@@ -1,14 +1,13 @@
 {
-    "name": "randomness-logger",
+    "name": "randomness-logger-backend",
     "version": "1.0.0",
-    "description": "Ethereum dapp that requests random numbers using Chainlink VRF v2 and logs them on the blockchain",
+    "description": "Smart contract that requests random numbers using Chainlink VRF v2 and logs them on the blockchain",
     "keywords": [
         "Ethereum",
         "Chainlink",
         "Solidity",
         "Ethers",
-        "Hardhat",
-        "Vue"
+        "Hardhat"
     ],
     "author": "Boban",
     "license": "ISC",
