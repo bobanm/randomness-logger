@@ -16,7 +16,7 @@ async function main () {
     const subscription: SubscriptionResponse = await Vrf.getSubscription(VRF_SUBSCRIPTION_ID)
 
     console.log(`owner      ${subscription.owner}`)
-    console.log(`balance    ${ethers.utils.formatUnits(subscription.balance)} LINK`)
+    console.log(`balance    ${Number(ethers.utils.formatUnits(subscription.balance)).toPrecision(6)} LINK`)
     console.log(`fulfilled  ${subscription.reqCount.toNumber()} requests`)
     
     if (subscription.consumers) {
