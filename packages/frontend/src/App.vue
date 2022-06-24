@@ -2,7 +2,7 @@
 
 import { defineComponent } from 'vue'
 import { ethers, Contract, BigNumber, providers } from 'ethers'
-import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED } from './config'
+import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED } from '../../../app.config'
 import './globals'
 
 type HistoryEntry = {
@@ -147,7 +147,7 @@ export default defineComponent({
             </table>
 
         </section>
-        
+
         <section v-if="errorMessage" class="top-gray">
             <img src="./images/sloth.svg">
             <h2>Error</h2>

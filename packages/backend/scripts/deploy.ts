@@ -1,5 +1,5 @@
 import { ethers } from 'hardhat'
-import { CONTRACT_NAME, VRF_SUBSCRIPTION_ID } from '../app.config'
+import { CONTRACT_NAME, VRF_SUBSCRIPTION_ID } from '../../../app.config'
 
 async function main () {
 

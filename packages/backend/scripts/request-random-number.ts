@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat'
 import { ContractTransaction } from 'ethers'
 
-import { CONTRACT_NAME, CONTRACT_ADDRESS, CALLBACK_GAS_LIMIT } from '../app.config'
+import { CONTRACT_NAME, CONTRACT_ADDRESS, CALLBACK_GAS_LIMIT } from '../../../app.config'
 
 async function main () {
 

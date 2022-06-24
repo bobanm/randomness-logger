@@ -2,8 +2,7 @@ import { ethers } from 'hardhat'
 import { BigNumber } from 'ethers'
 
 import '../utils/prototypes'
-
-const { CONTRACT_ADDRESS, CONTRACT_NAME, CONTRACT_BLOCK_DEPLOYED } = require('../app.config')
+import { CONTRACT_ADDRESS, CONTRACT_NAME, CONTRACT_BLOCK_DEPLOYED } from '../../../app.config'
 
 type HistoryEntry = {
     requestBlockNumber: number,
