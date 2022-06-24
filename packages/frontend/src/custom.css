@@ -1,0 +1,36 @@
+@import './base.css';
+
+:root {
+    --orange: #f2bc0f;
+    --green: #4bc190;
+    --red: #f85565;
+    --gray: #a7aece;
+}
+
+main {
+    max-width: 1200px;
+    margin-top: 2em;
+}
+
+table {
+    border-spacing: 1.1em 0.5em;
+    font-size: 1rem;
+    width: 100%;
+}
+
+th {
+    text-align: left;
+    font-weight: var(--weight2);
+}
+
+img {
+    width: 5em;
+    margin-top: -60px;
+}
+
+.top-green {
+    border-top-color: var(--green);
+}
+.top-gray {
+    border-top-color: var(--gray);
+}
