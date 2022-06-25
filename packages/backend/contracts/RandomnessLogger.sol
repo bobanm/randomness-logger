@@ -26,8 +26,8 @@ contract RandomnessLogger is VRFConsumerBaseV2 {
     uint32 constant CALLBACK_GAS_LIMIT = 100000;
     uint32 constant NUM_WORDS = 1;
 
-    event NumberRequested(uint requestId, uint timestamp, address indexed requestorAddress);
-    event NumberReceived(uint requestId, uint timestamp, uint randomNumber);
+    event NumberRequested(uint requestId, uint blockNumber, uint timestamp, address indexed requestorAddress);
+    event NumberReceived(uint requestId, uint blockNumber, uint timestamp, uint randomNumber);
 
     constructor (uint64 _vrfSubscriptionId) VRFConsumerBaseV2(VRF_COORDINATOR_ADDRESS) {
 
@@ -38,11 +38,11 @@ contract RandomnessLogger is VRFConsumerBaseV2 {
     function requestRandomNumber () external {
 
         uint requestId = vrfCoordinator.requestRandomWords(KEY_HASH, vrfSubscriptionId, MINIMUM_REQUEST_CONFIRMATIONS, CALLBACK_GAS_LIMIT, NUM_WORDS);
-        emit NumberRequested(requestId, block.timestamp, msg.sender);
+        emit NumberRequested(requestId, block.number, block.timestamp, msg.sender);
     }
 
     function fulfillRandomWords (uint requestId, uint[] memory randomWords) internal override {
 
-        emit NumberReceived(requestId, block.timestamp, randomWords[0]);
+        emit NumberReceived(requestId, block.number, block.timestamp, randomWords[0]);
     }
 }

@@ -6,11 +6,11 @@ import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED } from '../../.
 import './globals'
 
 type HistoryEntry = {
-    requestBlockNumber: number,
-    requestTimestamp: BigNumber,
     requestId: BigNumber,
+    requestBlockNumber: BigNumber,
+    requestTimestamp: BigNumber,
     requestorAddress: string,
-    responseBlockNumber?: number,
+    responseBlockNumber?: BigNumber,
     responseTimestamp?: BigNumber,
     randomNumber?: BigNumber,
 }
@@ -61,7 +61,7 @@ export default defineComponent({
 
             const filterRequests = RandomnessLogger.filters.NumberRequested()
             const filterResponses = RandomnessLogger.filters.NumberReceived()
-            
+
             const [requestsLog, responsesLog] = await Promise.all([
                 RandomnessLogger.queryFilter(filterRequests, CONTRACT_BLOCK_DEPLOYED),
                 RandomnessLogger.queryFilter(filterResponses, CONTRACT_BLOCK_DEPLOYED),
@@ -70,7 +70,7 @@ export default defineComponent({
             for (const requestsLogEntry of requestsLog) {
 
                 const historyEntry: HistoryEntry = {
-                    requestBlockNumber: requestsLogEntry.blockNumber,
+                    requestBlockNumber: requestsLogEntry.args!.blockNumber,
                     requestTimestamp: requestsLogEntry.args!.timestamp,
                     requestId: requestsLogEntry.args!.requestId,
                     requestorAddress: requestsLogEntry.args!.requestorAddress,
@@ -80,7 +80,7 @@ export default defineComponent({
                 for (const responsesLogEntry of responsesLog) {
 
                     if (responsesLogEntry.args!.requestId.toString() === requestsLogEntry.args!.requestId.toString()) {
-                        historyEntry.responseBlockNumber = responsesLogEntry.blockNumber
+                        historyEntry.responseBlockNumber = responsesLogEntry.args!.blockNumber
                         historyEntry.responseTimestamp = responsesLogEntry.args!.timestamp
                         historyEntry.randomNumber = responsesLogEntry.args!.randomNumber
 

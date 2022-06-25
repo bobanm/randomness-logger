@@ -5,11 +5,11 @@ import '../utils/prototypes'
 import { CONTRACT_ADDRESS, CONTRACT_NAME, CONTRACT_BLOCK_DEPLOYED } from '../../../app.config'
 
 type HistoryEntry = {
-    requestBlockNumber: number,
+    requestBlockNumber: BigNumber,
     requestTimestamp: BigNumber,
     requestId: BigNumber,
     requestorAddress: string,
-    responseBlockNumber?: number,
+    responseBlockNumber?: BigNumber,
     responseTimestamp?: BigNumber,
     randomNumber?: BigNumber,
 }
@@ -32,7 +32,7 @@ async function main () {
     for (const requestsLogEntry of requestsLog) {
 
         const historyEntry: HistoryEntry = {
-            requestBlockNumber: requestsLogEntry.blockNumber,
+            requestBlockNumber: requestsLogEntry.args!.blockNumber,
             requestTimestamp: requestsLogEntry.args!.timestamp,
             requestId: requestsLogEntry.args!.requestId,
             requestorAddress: requestsLogEntry.args!.requestorAddress,
@@ -42,7 +42,7 @@ async function main () {
         for (const responsesLogEntry of responsesLog) {
 
             if (responsesLogEntry.args!.requestId.toString() === requestsLogEntry.args!.requestId.toString()) {
-                historyEntry.responseBlockNumber = responsesLogEntry.blockNumber
+                historyEntry.responseBlockNumber = responsesLogEntry.args!.blockNumber
                 historyEntry.responseTimestamp = responsesLogEntry.args!.timestamp
                 historyEntry.randomNumber = responsesLogEntry.args!.randomNumber
 
