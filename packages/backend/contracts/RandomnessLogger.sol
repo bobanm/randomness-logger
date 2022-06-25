@@ -23,6 +23,7 @@ contract RandomnessLogger is VRFConsumerBaseV2 {
     uint64 immutable vrfSubscriptionId;
     bytes32 constant KEY_HASH = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc; // rinkeby
     uint16 constant MINIMUM_REQUEST_CONFIRMATIONS = 3;
+    uint32 constant CALLBACK_GAS_LIMIT = 100000;
     uint32 constant NUM_WORDS = 1;
 
     event NumberRequested(uint requestId, uint timestamp, address indexed requestorAddress);
@@ -34,12 +35,9 @@ contract RandomnessLogger is VRFConsumerBaseV2 {
         vrfCoordinator = VRFCoordinatorV2Interface(VRF_COORDINATOR_ADDRESS);
     }
 
-    /**
-        @param callbackGasLimit gas limit for VRF coordinator's callback to `fulfillRandomWords()`
-    */
-    function requestRandomNumbers (uint32 callbackGasLimit) external {
+    function requestRandomNumber () external {
 
-        uint requestId = vrfCoordinator.requestRandomWords(KEY_HASH, vrfSubscriptionId, MINIMUM_REQUEST_CONFIRMATIONS, callbackGasLimit, NUM_WORDS);
+        uint requestId = vrfCoordinator.requestRandomWords(KEY_HASH, vrfSubscriptionId, MINIMUM_REQUEST_CONFIRMATIONS, CALLBACK_GAS_LIMIT, NUM_WORDS);
         emit NumberRequested(requestId, block.timestamp, msg.sender);
     }
 
