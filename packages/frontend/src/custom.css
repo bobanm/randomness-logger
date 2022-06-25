@@ -34,3 +34,7 @@ img {
 .top-gray {
     border-top-color: var(--gray);
 }
+
+.start {
+    margin-top: 1em;
+}

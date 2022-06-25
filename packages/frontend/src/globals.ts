@@ -8,6 +8,11 @@ String.prototype.ellipsify = function (startLength, endLength) {
     return (this.substring(0, startLength) + '...' + this.substring(this.length - endLength))
 }
 
+Number.prototype.toDateString = function () {
+
+    return (new Date(Number(this) * 1000)).toNiceString()
+}
+
 Date.prototype.toNiceString = function () {
 
     const YYYY = this.getFullYear().toString()

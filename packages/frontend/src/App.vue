@@ -1,7 +1,7 @@
 <script lang="ts">
 
 import { defineComponent } from 'vue'
-import { ethers, Contract, BigNumber, providers } from 'ethers'
+import { ethers, Contract, BigNumber, providers, ContractTransaction } from 'ethers'
 import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED } from '../../../app.config'
 import './globals'
 
@@ -25,6 +25,9 @@ export default defineComponent({
             accountAddress: '',
             history: [] as HistoryEntry[],
             errorMessage: '',
+            requestMessages: [] as string[],
+            responseMessages: [] as string[],
+            isRequestFulfilled: false,
         }
     },
 
@@ -34,6 +37,9 @@ export default defineComponent({
 
             this.history = []
             this.errorMessage = ''
+            this.requestMessages = []
+            this.responseMessages = []
+            this.isRequestFulfilled = false
 
             provider = new ethers.providers.Web3Provider(window.ethereum)
             const providerNetwork = await provider.getNetwork()
@@ -46,8 +52,59 @@ export default defineComponent({
 
             RandomnessLogger = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider)
 
-            await this.initAccount()
             await this.fetchHistory()
+            this.registerEventListeners()
+            await this.initAccount()
+
+        },
+
+        registerEventListeners () {
+
+            RandomnessLogger.on('NumberRequested', (requestId: BigNumber, requestBlockNumber: BigNumber, requestTimestamp: BigNumber, requestorAddress: string) => {
+
+                const newHistoryEntry: HistoryEntry = {
+                    requestId,
+                    requestBlockNumber,
+                    requestTimestamp,
+                    requestorAddress,
+                }
+
+                // add new history entry if an entry with the same ID isn't already registered
+                const historyEntry = this.getHistoryEntry(requestId)
+
+                if (!historyEntry) {
+                    this.history.push(newHistoryEntry)
+                }
+            })
+
+            RandomnessLogger.on('NumberReceived', (requestId: BigNumber, responseBlockNumber: BigNumber, responseTimestamp: BigNumber, randomNumber: BigNumber) => {
+                
+                for (const historyEntry of this.history) {
+
+                    if (historyEntry.requestId.toString() === requestId.toString()) {
+                        historyEntry.responseBlockNumber = responseBlockNumber
+                        historyEntry.responseTimestamp = responseTimestamp
+                        historyEntry.randomNumber = randomNumber
+
+                        // only display the final confirmation if it was the user who requested the random number
+                        if (this.requestMessages.length && this.responseMessages.length) {
+                            this.isRequestFulfilled = true
+                        }
+
+                        break
+                    }
+                }
+            })
+        },
+
+        getHistoryEntry (requestId: BigNumber): HistoryEntry | undefined {
+
+            for (const historyEntry of this.history) {
+                if (historyEntry.requestId.toString() === requestId.toString()) {
+
+                    return historyEntry
+                }
+            }
         },
 
         async initAccount () {
@@ -55,6 +112,7 @@ export default defineComponent({
             const accounts = await provider.send('eth_requestAccounts', [])
             this.accountAddress = accounts[0]
             signer = provider.getSigner()
+            RandomnessLogger = RandomnessLogger.connect(signer)
         },
 
         async fetchHistory () {
@@ -90,6 +148,27 @@ export default defineComponent({
 
                 this.history.push(historyEntry)
             }
+        },
+
+        async requestRandomNumber () {
+
+            this.requestMessages = []
+            this.responseMessages = []
+            this.isRequestFulfilled = false
+
+            const transaction: ContractTransaction = await RandomnessLogger.requestRandomNumber()
+            this.requestMessages.push(
+                `Requested a random number`,
+                `Transaction ${transaction.hash}`,
+                `Waiting for the transaction to be mined...`,
+            )
+            const receipt = await transaction.wait()
+
+            this.responseMessages.push(
+                `Confirmed in block ${receipt.events![1].args!.blockNumber}`,
+                `Request ID ${receipt.events![1].args!.requestId}`,
+                `Chainlink VRF will fulfill it in about 3 blocks. Stay tuned...`,
+            )
         },
     },
 
@@ -136,16 +215,30 @@ export default defineComponent({
                 <tbody>
                     <tr v-for="historyEntry in history">
                         <td>{{ historyEntry.requestId.toString().ellipsify(7, 3) }}</td>
-                        <td>{{ new Date(historyEntry.requestTimestamp.toNumber() * 1000).toNiceString() }}</td>
-                        <td>{{ historyEntry.responseTimestamp ? new Date(historyEntry.responseTimestamp.toNumber() * 1000).toNiceString() : ''.padEnd(19)}}</td>
+                        <td>{{ historyEntry.requestTimestamp.toNumber().toDateString() }}</td>
+                        <td>{{ historyEntry.responseTimestamp?.toNumber().toDateString() ?? '' }}</td>
                         <td>{{ historyEntry.requestBlockNumber.toString().padEnd(8) }}</td>
-                        <td>{{ historyEntry.responseBlockNumber?.toString().padEnd(8) ?? ''.padEnd(8) }}</td>
+                        <td>{{ historyEntry.responseBlockNumber?.toString().padEnd(8) ?? '' }}</td>
                         <td>{{ historyEntry.requestorAddress.ellipsify(8, 3) }}</td>
                         <td>{{ historyEntry.randomNumber?.toString().ellipsify(7, 3) ?? '' }}</td>
                     </tr>
                 </tbody>
             </table>
 
+        </section>
+
+        <section v-if="!errorMessage" class="top-red">
+            <img src="./images/santa.svg">
+            <button @click="requestRandomNumber" class="btn-red">Request a new random number</button>
+            <div v-if="requestMessages.length" class="start">
+                <div v-for="message of requestMessages">{{ message }}</div>
+            </div>
+            <div v-if="responseMessages.length" class="start">
+                <div v-for="message of responseMessages">{{ message }}</div>
+            </div>
+            <div v-if="isRequestFulfilled" class="start">
+                <div>Request fulfilled successfully</div>
+            </div>
         </section>
 
         <section v-if="errorMessage" class="top-gray">
