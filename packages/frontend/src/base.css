@@ -125,7 +125,7 @@ img.right {
 }
 
 img.bottom {
-    margin: 1.5rem auto;
+    margin: 0 1rem;
     width: 64px;
 }
 

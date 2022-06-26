@@ -260,6 +260,12 @@ export default defineComponent({
             <h2>Error</h2>
             <div>{{ errorMessage }}</div>
         </section>
+
+        <div class="center">
+            <a href="https://boban.ninja"><img src="./images/house.svg" class="bottom"></a>
+            <a href="https://github.com/bobanm/randomness-logger" target="_blank" rel="noopener noreferrer"><img src="./images/github.svg" class="bottom"></a>
+        </div>
+
     </main>
 </template>
 
