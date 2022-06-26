@@ -122,12 +122,20 @@ section {
 
 img.right {
     float: right;
+}
+
+img.bottom {
+    margin: 1.5rem auto;
+    width: 64px;
+}
+
+img.right, img.bottom {
     transition-duration: 0.5s;
     transition-timing-function: ease-out;
 }
 
-img.right:hover {
-    transform: rotate(30deg);
+img.right:hover, img.bottom:hover {
+    transform: scale(1.2, 1.2);
 }
 
 ul {
