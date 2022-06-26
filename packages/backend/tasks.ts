@@ -28,6 +28,22 @@ task('balances', 'Prints balances of all configured accounts')
         }
     })
 
+task('send', 'Sends ETH from the primary account to another account')
+    .addParam('address', 'Address of the receiver')
+    .addParam('amount', 'Amount in ETH')
+    .setAction(async (args, hre) => {
+
+        const signer = hre.ethers.provider.getSigner()
+
+        const transactionSend = await signer.sendTransaction({
+            to: args.address,
+            value: hre.ethers.utils.parseEther(String(args.amount))
+        })
+        console.log(`transaction hash: ${transactionSend.hash}`)
+        const receiptSend = await transactionSend.wait()
+        console.log(`mined in block: ${receiptSend.blockNumber}`)
+    })
+
 task('deploy', 'Deploy a contract')
     .addParam('contract', 'Contract name')
     .setAction(async (args, hre) => {
