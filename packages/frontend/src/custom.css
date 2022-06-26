@@ -23,7 +23,7 @@ th {
     font-weight: var(--weight2);
 }
 
-img {
+img.right {
     width: 5em;
     margin-top: -60px;
 }

@@ -198,7 +198,7 @@ export default defineComponent({
 <template>
     <main>
         <section v-if="!errorMessage" class="top-orange">
-            <img src="./images/batman.svg">
+            <img src="./images/batman.svg" class="right">
             <h2>Status</h2>
             <div v-if="isReadOnly">
                 Web3 wallet not detected. The app is now working in read-only mode.<br/>
@@ -208,7 +208,7 @@ export default defineComponent({
         </section>
         
         <section v-if="!errorMessage" class="top-green">
-            <img src="./images/pilot.svg">
+            <img src="./images/pilot.svg" class="right">
             <h2>Random Numbers History</h2>
             <table>
                 <thead>
@@ -238,7 +238,7 @@ export default defineComponent({
         </section>
 
         <section v-if="!errorMessage" class="top-red">
-            <img src="./images/santa.svg">
+            <img src="./images/santa.svg" class="right">
             <button @click="requestRandomNumber" :disabled="isReadOnly" class="btn-red">Request a new random number</button>
             <div v-if="isReadOnly" class="start">
                 It is not possible to request a new random number from Chainlink without a web3 wallet.<br/>
@@ -256,7 +256,7 @@ export default defineComponent({
         </section>
 
         <section v-if="errorMessage" class="top-gray">
-            <img src="./images/sloth.svg">
+            <img src="./images/sloth.svg" class="right">
             <h2>Error</h2>
             <div>{{ errorMessage }}</div>
         </section>

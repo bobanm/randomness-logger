@@ -120,8 +120,14 @@ section {
     border-top: 3px solid;
 }
 
-img {
+img.right {
     float: right;
+    transition-duration: 0.5s;
+    transition-timing-function: ease-out;
+}
+
+img.right:hover {
+    transform: rotate(30deg);
 }
 
 ul {
