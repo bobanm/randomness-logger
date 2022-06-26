@@ -7,6 +7,7 @@ export const CONTRACT_ABI = [
     'function requestRandomNumber () external',
 ]
 export const CONTRACT_BLOCK_DEPLOYED = 10915655
+export const DEFAULT_NETWORK = 'rinkeby'
 
 export const VRF_SUBSCRIPTION_ID = 5853
 export const VRF_CONTRACT_ADDRESS = '0x6168499c0cFfCaCD319c818142124B7A15E857ab'

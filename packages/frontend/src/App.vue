@@ -2,7 +2,7 @@
 
 import { defineComponent } from 'vue'
 import { ethers, Contract, BigNumber, providers, ContractTransaction } from 'ethers'
-import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED } from '../../../app.config'
+import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED, DEFAULT_NETWORK } from '../../../app.config'
 import './globals'
 
 type HistoryEntry = {
@@ -25,6 +25,7 @@ export default defineComponent({
             accountAddress: '',
             history: [] as HistoryEntry[],
             errorMessage: '',
+            isReadOnly: false,
             requestMessages: [] as string[],
             responseMessages: [] as string[],
             isRequestFulfilled: false,
@@ -41,7 +42,15 @@ export default defineComponent({
             this.responseMessages = []
             this.isRequestFulfilled = false
 
-            provider = new ethers.providers.Web3Provider(window.ethereum)
+            if (window.ethereum) {
+                provider = new ethers.providers.Web3Provider(window.ethereum)
+                this.isReadOnly = false
+            }
+            else {
+                provider = ethers.providers.getDefaultProvider(DEFAULT_NETWORK) as providers.Web3Provider
+                this.isReadOnly = true
+            }
+
             const providerNetwork = await provider.getNetwork()
 
             if (providerNetwork.chainId !== 4) {
@@ -54,8 +63,9 @@ export default defineComponent({
 
             await this.fetchHistory()
             this.registerEventListeners()
-            await this.initAccount()
-
+            if (!this.isReadOnly) {
+                await this.initAccount()
+            }
         },
 
         registerEventListeners () {
@@ -174,16 +184,12 @@ export default defineComponent({
 
     async created () {
 
-        if (!window.ethereum) {
-            this.errorMessage = 'MetaMask not detected. Please install MetaMask and refresh the page.'
-
-            return
-        }
-
         await this.init()
 
-        window.ethereum.on('chainChanged', () => { this.init() })
-        window.ethereum.on('accountsChanged', () => { this.initAccount() })
+        if (!this.isReadOnly) {
+            window.ethereum.on('chainChanged', () => { this.init() })
+            window.ethereum.on('accountsChanged', () => { this.initAccount() })
+        }
     },
 })
 
@@ -194,7 +200,11 @@ export default defineComponent({
         <section v-if="!errorMessage" class="top-orange">
             <img src="./images/batman.svg">
             <h2>Status</h2>
-            Account address {{ accountAddress }}
+            <div v-if="isReadOnly">
+                Web3 wallet not detected. The app is now working in read-only mode.<br/>
+                To be able to request a random number, please install a web3 wallet such as MetaMask, or even better, use Brave browser.
+            </div>
+            <div v-else>Web3 wallet connected.<br/>Address {{ accountAddress }}</div>
         </section>
         
         <section v-if="!errorMessage" class="top-green">
@@ -229,7 +239,11 @@ export default defineComponent({
 
         <section v-if="!errorMessage" class="top-red">
             <img src="./images/santa.svg">
-            <button @click="requestRandomNumber" class="btn-red">Request a new random number</button>
+            <button @click="requestRandomNumber" :disabled="isReadOnly" class="btn-red">Request a new random number</button>
+            <div v-if="isReadOnly" class="start">
+                It is not possible to request a new random number from Chainlink without a web3 wallet.<br/>
+                You can still browse all the previously generated random numbers, shown in the table above.
+            </div>
             <div v-if="requestMessages.length" class="start">
                 <div v-for="message of requestMessages">{{ message }}</div>
             </div>
