@@ -4,6 +4,9 @@ import { defineComponent } from 'vue'
 import { ethers, Contract, BigNumber, providers, ContractTransaction } from 'ethers'
 import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED, DEFAULT_NETWORK } from '../../../app.config'
 import './globals'
+import Status from './components/Status.vue'
+import History from './components/History.vue'
+import Error from './components/Error.vue'
 
 type HistoryEntry = {
     requestId: BigNumber,
@@ -30,6 +33,12 @@ export default defineComponent({
             responseMessages: [] as string[],
             isRequestFulfilled: false,
         }
+    },
+    
+    components: {
+        Status,
+        History,
+        Error,
     },
 
     methods: {
@@ -197,45 +206,9 @@ export default defineComponent({
 
 <template>
     <main>
-        <section v-if="!errorMessage" class="top-orange">
-            <img src="./images/batman.svg" class="right zoom">
-            <h2>Status</h2>
-            <div v-if="isReadOnly">
-                Web3 wallet not detected. The app is now working in read-only mode.<br/>
-                To be able to request a random number, please install a web3 wallet such as MetaMask, or even better, use Brave browser.
-            </div>
-            <div v-else>Web3 wallet connected.<br/>Address {{ accountAddress }}</div>
-        </section>
-        
-        <section v-if="!errorMessage" class="top-green">
-            <img src="./images/pilot.svg" class="right zoom">
-            <h2>Random Numbers History</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Request ID</th>
-                        <th>Request date</th>
-                        <th>Response date</th>
-                        <th>Request block</th>
-                        <th>Response block</th>
-                        <th>Requestor address</th>
-                        <th>Random number</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="historyEntry in history">
-                        <td>{{ historyEntry.requestId.toString().ellipsify(7, 3) }}</td>
-                        <td>{{ historyEntry.requestTimestamp.toNumber().toDateString() }}</td>
-                        <td>{{ historyEntry.responseTimestamp?.toNumber().toDateString() ?? '' }}</td>
-                        <td>{{ historyEntry.requestBlockNumber.toString().padEnd(8) }}</td>
-                        <td>{{ historyEntry.responseBlockNumber?.toString().padEnd(8) ?? '' }}</td>
-                        <td>{{ historyEntry.requestorAddress.ellipsify(8, 3) }}</td>
-                        <td>{{ historyEntry.randomNumber?.toString().ellipsify(7, 3) ?? '' }}</td>
-                    </tr>
-                </tbody>
-            </table>
+        <Status v-if="!errorMessage" :isReadOnly="isReadOnly">{{ accountAddress }}</Status>
 
-        </section>
+        <History v-if="!errorMessage" :history="history"/>
 
         <section v-if="!errorMessage" class="top-red">
             <img src="./images/santa.svg" class="right zoom">
@@ -255,11 +228,7 @@ export default defineComponent({
             </div>
         </section>
 
-        <section v-if="errorMessage" class="top-gray">
-            <img src="./images/sloth.svg" class="right zoom">
-            <h2>Error</h2>
-            <div>{{ errorMessage }}</div>
-        </section>
+        <Error v-if="errorMessage">{{ errorMessage }}</Error>
     </main>
 
     <footer>
