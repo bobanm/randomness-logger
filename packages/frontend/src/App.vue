@@ -198,7 +198,7 @@ export default defineComponent({
 <template>
     <main>
         <section v-if="!errorMessage" class="top-orange">
-            <img src="./images/batman.svg" class="right">
+            <img src="./images/batman.svg" class="right zoom">
             <h2>Status</h2>
             <div v-if="isReadOnly">
                 Web3 wallet not detected. The app is now working in read-only mode.<br/>
@@ -208,7 +208,7 @@ export default defineComponent({
         </section>
         
         <section v-if="!errorMessage" class="top-green">
-            <img src="./images/pilot.svg" class="right">
+            <img src="./images/pilot.svg" class="right zoom">
             <h2>Random Numbers History</h2>
             <table>
                 <thead>
@@ -238,7 +238,7 @@ export default defineComponent({
         </section>
 
         <section v-if="!errorMessage" class="top-red">
-            <img src="./images/santa.svg" class="right">
+            <img src="./images/santa.svg" class="right zoom">
             <button @click="requestRandomNumber" :disabled="isReadOnly" class="btn-red">Request a new random number</button>
             <div v-if="isReadOnly" class="start">
                 It is not possible to request a new random number from Chainlink without a web3 wallet.<br/>
@@ -256,17 +256,17 @@ export default defineComponent({
         </section>
 
         <section v-if="errorMessage" class="top-gray">
-            <img src="./images/sloth.svg" class="right">
+            <img src="./images/sloth.svg" class="right zoom">
             <h2>Error</h2>
             <div>{{ errorMessage }}</div>
         </section>
-
-        <div class="center">
-            <a href="https://boban.ninja"><img src="./images/house.svg" class="bottom"></a>
-            <a href="https://github.com/bobanm/randomness-logger" target="_blank" rel="noopener noreferrer"><img src="./images/github.svg" class="bottom"></a>
-        </div>
-
     </main>
+
+    <footer>
+        <a href="https://boban.ninja/"><img src="./images/house.svg" class="zoom"></a>
+        <a href="https://github.com/bobanm/randomness-logger/" target="_blank" rel="noopener noreferrer"><img src="./images/github.svg" class="zoom"></a>
+    </footer>
+
 </template>
 
 <style>

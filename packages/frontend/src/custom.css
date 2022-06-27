@@ -1,4 +1,4 @@
-@import './base.css';
+@import '@bobanm/cardinal';
 
 :root {
     --orange: #f2bc0f;
@@ -41,5 +41,4 @@ img.right {
 
 .center {
     text-align: center;
-    margin: 1em 0;
 }
