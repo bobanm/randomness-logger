@@ -1,8 +1,8 @@
-<script lang="ts">
+<script setup lang="ts">
 
-export default {
-    props: ['history'],
-}
+const props = defineProps({
+    history: Array<HistoryEntry>
+})
 
 </script>
 

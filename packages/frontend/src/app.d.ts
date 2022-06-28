@@ -14,4 +14,14 @@ export declare global {
     interface Date {
         toNiceString (): string
     }
+
+    type HistoryEntry = {
+        requestId: BigNumber,
+        requestBlockNumber: BigNumber,
+        requestTimestamp: BigNumber,
+        requestorAddress: string,
+        responseBlockNumber?: BigNumber,
+        responseTimestamp?: BigNumber,
+        randomNumber?: BigNumber,
+    }
 }

@@ -1,8 +1,8 @@
-<script lang="ts">
+<script setup lang="ts">
 
-export default {
-    props: ['isReadOnly'],
-}
+const props = defineProps({
+    isReadOnly: Boolean
+})
 
 </script>
 
