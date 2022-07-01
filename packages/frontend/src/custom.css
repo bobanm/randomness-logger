@@ -8,8 +8,9 @@
 }
 
 main {
-    max-width: 1200px;
+    max-width: 66em;
     margin-top: 2em;
+    gap: 1.8em;
 }
 
 table {
