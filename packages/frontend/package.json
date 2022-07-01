@@ -7,7 +7,7 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "@bobanm/cardinal": "^0.0.6",
+        "@bobanm/cardinal": "^0.0.7",
         "ethers": "^5.6.9",
         "vue": "^3.2.37"
     },

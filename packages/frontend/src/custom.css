@@ -17,6 +17,9 @@ table {
     border-spacing: 1.1em 0.5em;
     font-size: 1rem;
     width: 100%;
+    margin-bottom: 1.5em;
+    border-top: 1px solid var(--green);
+    border-bottom: 1px solid var(--green);
 }
 
 th {
