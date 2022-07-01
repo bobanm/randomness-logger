@@ -80,7 +80,7 @@ function registerEventListeners () {
         const historyEntry = getHistoryEntry(requestId)
 
         if (!historyEntry) {
-            history.value.push(newHistoryEntry)
+            history.value.unshift(newHistoryEntry)
         }
     })
 
@@ -153,7 +153,7 @@ async function fetchHistory () {
             }
         }
 
-        history.value.push(historyEntry)
+        history.value.unshift(historyEntry)
     }
 }
 
