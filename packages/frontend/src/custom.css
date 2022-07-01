@@ -7,15 +7,38 @@
     --gray: #a7aece;
 }
 
+body {
+    font-size: 1em;
+}
+
 main {
     max-width: 66em;
     margin-top: 2em;
     gap: 1.8em;
+    grid-template-areas: 
+        'status status'
+        'history history'
+        'request request'
+        'error error';
 }
+
+#status {
+    grid-area: status;
+}
+#history {
+    grid-area: history;
+}
+#request {
+    grid-area: request;
+}
+#error {
+    grid-area: error;
+}
+
 
 table {
     border-spacing: 1.1em 0.5em;
-    font-size: 1rem;
+    font-size: 0.875em;
     width: 100%;
     margin-bottom: 1.5em;
     border-top: 1px solid var(--green);
@@ -26,6 +49,29 @@ th {
     text-align: left;
     font-weight: var(--weight2);
 }
+
+th.priority2, td.priority2, th.priority3, td.priority3 {
+    display: none;
+}
+
+@media (min-width: 44em) {
+    body {
+        font-size: 1.125rem;
+    }
+    table {
+        font-size: 1rem;
+    }
+    th.priority2, td.priority2 {
+        display: table-cell;
+    }
+}
+
+@media (min-width: 70em) {
+    th.priority3, td.priority3 {
+        display: table-cell;
+    }
+}
+
 
 img.right {
     width: 5em;

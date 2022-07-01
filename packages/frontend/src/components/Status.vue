@@ -8,7 +8,7 @@ const props = defineProps({
 
 <template>
 
-<section class="top-orange">
+<section id="status" class="top-orange">
     <img src="../images/batman.svg" class="right zoom">
     <h2>Status</h2>
     <div v-if="isReadOnly">

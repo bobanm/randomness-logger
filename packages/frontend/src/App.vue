@@ -186,7 +186,7 @@ async function requestRandomNumber () {
 
         <History v-if="!errorMessage" :history="history"/>
 
-        <section v-if="!errorMessage" class="top-red">
+        <section id="request" v-if="!errorMessage" class="top-red">
             <img src="./images/santa.svg" class="right zoom">
             <button @click="requestRandomNumber" :disabled="isReadOnly" class="btn-red">Request a new random number</button>
             <div v-if="isReadOnly" class="start">
