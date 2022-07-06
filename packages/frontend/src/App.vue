@@ -181,12 +181,12 @@ async function requestRandomNumber () {
 </script>
 
 <template>
-    <main>
-        <Status v-if="!errorMessage" :isReadOnly="isReadOnly">{{ accountAddress }}</Status>
+    <main v-if="!errorMessage">
+        <Status :isReadOnly="isReadOnly">{{ accountAddress }}</Status>
 
-        <History v-if="!errorMessage" :history="history"/>
+        <History :history="history"/>
 
-        <section id="request" v-if="!errorMessage" class="top-red">
+        <section id="request" class="top-red">
             <img src="./images/santa.svg" class="right zoom">
             <button @click="requestRandomNumber" :disabled="isReadOnly" class="btn-red">Request a new random number</button>
             <div v-if="isReadOnly" class="start">
@@ -203,8 +203,9 @@ async function requestRandomNumber () {
                 <div>Request fulfilled successfully</div>
             </div>
         </section>
-
-        <Error v-if="errorMessage">{{ errorMessage }}</Error>
+    </main>
+    <main v-else>
+        <Error>{{ errorMessage }}</Error>
     </main>
 
     <footer>
