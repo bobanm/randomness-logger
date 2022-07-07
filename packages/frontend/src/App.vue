@@ -6,6 +6,7 @@ import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED, DEFAULT_NETWOR
 import './globals'
 
 import Status from './components/Status.vue'
+import Subscription from './components/Subscription.vue'
 import History from './components/History.vue'
 import Error from './components/Error.vue'
 
@@ -20,6 +21,8 @@ const isReadOnly = ref(false)
 const requestMessages = ref<string[]>([])
 const responseMessages = ref<string[]>([])
 const isRequestFulfilled = ref(false)
+
+const subscription = ref<InstanceType<typeof Subscription> | null>(null)
 
 onMounted(async () => {
 
@@ -84,7 +87,7 @@ function registerEventListeners () {
         }
     })
 
-    RandomnessLogger.on('NumberReceived', (requestId: BigNumber, responseBlockNumber: BigNumber, responseTimestamp: BigNumber, randomNumber: BigNumber) => {
+    RandomnessLogger.on('NumberReceived', async (requestId: BigNumber, responseBlockNumber: BigNumber, responseTimestamp: BigNumber, randomNumber: BigNumber) => {
         
         for (const historyEntry of history.value) {
 
@@ -101,6 +104,8 @@ function registerEventListeners () {
                 break
             }
         }
+
+        await subscription.value?.update()
     })
 }
 
@@ -183,6 +188,10 @@ async function requestRandomNumber () {
 <template>
     <main v-if="!errorMessage">
         <Status :isReadOnly="isReadOnly">{{ accountAddress }}</Status>
+
+        <Suspense>
+            <Subscription ref="subscription"/>
+        </Suspense>
 
         <History :history="history"/>
 

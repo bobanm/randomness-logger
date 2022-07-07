@@ -2,6 +2,7 @@
 
 :root {
     --orange: #f2bc0f;
+    --blue: #00adfe;
     --green: #4bc190;
     --red: #f85565;
     --gray: #a7aece;
@@ -17,6 +18,7 @@ main {
     gap: 1.8em;
     grid-template-areas: 
         'status status'
+        'subscription subscription'
         'history history'
         'request request'
         'error error';
@@ -24,6 +26,9 @@ main {
 
 #status {
     grid-area: status;
+}
+#subscription {
+    grid-area: subscription;
 }
 #history {
     grid-area: history;
@@ -34,7 +39,6 @@ main {
 #error {
     grid-area: error;
 }
-
 
 table {
     border-spacing: 1.1em 0.5em;
@@ -58,6 +62,14 @@ th.priority2, td.priority2, th.priority3, td.priority3 {
     body {
         font-size: 1.125rem;
     }
+    main {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas: 
+            'status subscription'
+            'history history'
+            'request request'
+            'error error';
+    }
     table {
         font-size: 1rem;
     }
@@ -71,7 +83,6 @@ th.priority2, td.priority2, th.priority3, td.priority3 {
         display: table-cell;
     }
 }
-
 
 img.right {
     width: 5em;
