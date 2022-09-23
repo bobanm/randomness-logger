@@ -53,8 +53,8 @@ async function init () {
 
     const providerNetwork = await provider.getNetwork()
 
-    if (providerNetwork.chainId !== 4) {
-        errorMessage.value = 'The smart contract is currently deployed only on Rinkeby network. Please switch your wallet to Rinkeby.'
+    if (providerNetwork.chainId !== 5) {
+        errorMessage.value = 'The smart contract is currently deployed only on Goerli network. Please switch your wallet to Goerli.'
 
         return
     }
