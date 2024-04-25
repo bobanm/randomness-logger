@@ -4,7 +4,7 @@ What is this all about?
 -----------------------
 
 This is a demo of Chainlink VRF v2 oracle. The app alows a user to browse all the random numbers
-previously obtained using its smart contract. If connected to Goerli test network, a user can also
+previously obtained using its smart contract. If connected to Sepolia test network, a user can also
 request a new random number from the oracle.
 
 The demo consists of 2 packages:
@@ -36,8 +36,8 @@ Where can I see it in action?
 
 To access the app, go to https://boban.ninja/randomness
 
-The contract is currently deployed only on Goerli, because that's the only [?] testnet where
-Chainlink VRF v2 Aggregator contract is deployed.
+The contract is currently deployed only on Sepolia, but you can deploy it to other
+networks where [Chainlink VRF v2 Aggregator contract](https://vrf.chain.link/) is deployed.
 
 
 Technologies used
@@ -66,7 +66,7 @@ frontend. If you love to play with Hardhat, TypeScript and Vue.js, you're going 
 
 For Chainlink VRF v2 to work, you will have to create a subscription with Chainlink:
 
-https://vrf.chain.link/goerli
+https://vrf.chain.link/sepolia/new
 
 Once you have your subscription ID, you are ready to deploy the smart contract.
 
@@ -77,16 +77,16 @@ Once that is completed, it is time to deploy the Randomness smart contract:
 
 ```bash
 cd ./packages/backend
-pnpm hardhat run ./scripts/deploy.ts --network goerli
+pnpm hardhat run ./scripts/deploy.ts --network sepolia
 ```
 
 Once the process is completed, you will have an address of your newly deployed contract. Head back
 to VRF subscription page to make your newly deployed contract a consumer of the subscription.
 
 Once you are there, you can fund your subscription with LINK, which is how you pay to Chainlink for
-using their service. If you need Goerli LINK token, you can get it from Chainlink faucet:
+using their service. If you need Sepolia LINK token, you can get it from Chainlink faucet:
 
-https://faucets.chain.link/goerli
+https://faucets.chain.link/
 
 By now you also know in which block the contract has been deployed. Our app uses that info when it
 requests the history of random numbers. It doesn't make sense to query blockchain for events in
@@ -97,7 +97,7 @@ To set the starting block used by search query, go back to `app.config.ts` and u
 
 Besides deploy script, `scripts` folder also includes a few CLI scripts, which you can play with:
 
-1. `get-subscription-details` -- how much link you have left, how many request are fulfilled...
+1. `get-subscription-details` -- how much LINK you have left, how many request are fulfilled, and more
 1. `get-numbers-history` -- reads the logs and shows the details of all previous requests
 1. `request-random-number` -- make your request here, if you don't like the web frontend
 

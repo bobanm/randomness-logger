@@ -5,4 +5,5 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
     plugins: [vue()],
     clearScreen: false,
+    base: '/randomness/', // used when deploying to my nested public path on boban.ninja/randomness
 })

@@ -3,7 +3,7 @@
 import { ethers, providers, BigNumber } from 'ethers'
 import { ref } from 'vue';
 import type { Ref } from 'vue'
-import { DEFAULT_NETWORK, VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, VRF_SUBSCRIPTION_ID } from '../../../../app.config';
+import { Network, VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, VRF_SUBSCRIPTION_ID } from '../../../../app.config';
 
 type Subscription = {
     owner: string,
@@ -24,7 +24,7 @@ if (window.ethereum) {
     provider = new ethers.providers.Web3Provider(window.ethereum)
 }
 else {
-    provider = ethers.providers.getDefaultProvider(DEFAULT_NETWORK) as providers.Web3Provider
+    provider = ethers.providers.getDefaultProvider(Network.NAME) as providers.Web3Provider
 }
 
 const VrfContract = new ethers.Contract(VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, provider)

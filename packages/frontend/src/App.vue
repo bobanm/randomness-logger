@@ -2,7 +2,7 @@
 
 import { ref, onMounted } from 'vue'
 import { ethers, Contract, BigNumber, providers, ContractTransaction } from 'ethers'
-import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED, DEFAULT_NETWORK } from '../../../app.config'
+import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED, Network } from '../../../app.config'
 import './globals'
 
 import Status from './components/Status.vue'
@@ -47,14 +47,14 @@ async function init () {
         isReadOnly.value = false
     }
     else {
-        provider = ethers.providers.getDefaultProvider(DEFAULT_NETWORK) as providers.Web3Provider
+        provider = ethers.providers.getDefaultProvider(Network.NAME) as providers.Web3Provider
         isReadOnly.value = true
     }
 
     const providerNetwork = await provider.getNetwork()
 
-    if (providerNetwork.chainId !== 5) {
-        errorMessage.value = 'The smart contract is currently deployed only on Goerli network. Please switch your wallet to Goerli.'
+    if (providerNetwork.chainId !== Network.ID) {
+        errorMessage.value = 'The smart contract is currently deployed only on Sepolia network. Please switch your wallet to Sepolia.'
 
         return
     }
@@ -88,7 +88,7 @@ function registerEventListeners () {
     })
 
     RandomnessLogger.on('NumberReceived', async (requestId: BigNumber, responseBlockNumber: BigNumber, responseTimestamp: BigNumber, randomNumber: BigNumber) => {
-        
+
         for (const historyEntry of history.value) {
 
             if (historyEntry.requestId.toString() === requestId.toString()) {
@@ -145,7 +145,7 @@ async function fetchHistory () {
             requestId: requestsLogEntry.args!.requestId,
             requestorAddress: requestsLogEntry.args!.requestorAddress,
         }
-        
+
         // search through responses log array, match with requests array on requestId and assign missing values
         for (const responsesLogEntry of responsesLog) {
 

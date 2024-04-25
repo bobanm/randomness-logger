@@ -1,33 +1,21 @@
 {
-    "name": "randomness-frontend",
+    "name": "randomness-logger-frontend",
     "version": "0.0.0",
-    "description": "Using Chainlink VRF v2, request a random number and/or browse history of all previously requested random numbers.",
+    "description": "Frontend for the smart contract that uses Chainlink services.",
     "scripts": {
         "dev": "vite",
         "build": "vue-tsc --noEmit && vite build",
         "preview": "vite preview"
     },
-    "keywords": [
-        "Ethereum",
-        "Solidity",
-        "TypeScript",
-        "Ethers",
-        "Hardhat",
-        "Chainlink",
-        "Vue",
-        "Vite"
-    ],
-    "author": "Boban",
-    "license": "ISC",
     "dependencies": {
         "@bobanm/cardinal": "^0.0.8",
-        "ethers": "^5.7.1",
-        "vue": "^3.2.39"
+        "ethers": "5.7.1",
+        "vue": "3.2.39"
     },
     "devDependencies": {
-        "@vitejs/plugin-vue": "^3.1.0",
-        "typescript": "^4.8.3",
-        "vite": "^3.1.3",
-        "vue-tsc": "^0.40.13"
+        "@vitejs/plugin-vue": "3.1.0",
+        "typescript": "4.8.3",
+        "vite": "3.1.3",
+        "vue-tsc": "0.40.13"
     }
 }
