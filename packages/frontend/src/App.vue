@@ -90,7 +90,7 @@ function registerEventListeners () {
 
         for (const historyEntry of history.value) {
 
-            if (historyEntry.requestId.toString() === requestId.toString()) {
+            if (historyEntry.requestId === requestId) {
                 historyEntry.responseBlockNumber = responseBlockNumber
                 historyEntry.responseTimestamp = responseTimestamp
                 historyEntry.randomNumber = randomNumber
@@ -136,28 +136,24 @@ async function fetchHistory () {
         RandomnessLoggerReader.queryFilter(filterResponses, CONTRACT_BLOCK_DEPLOYED),
     ]) as [ethers.EventLog[], ethers.EventLog[]]
 
-    for (const requestsLogEntry of requestsLog) {
+    // search through responses log array, match with requests log array on requestId
+    for (const responsesLogEntry of responsesLog) {
+        for (const requestsLogEntry of requestsLog) {
 
-        const historyEntry: HistoryEntry = {
-            requestBlockNumber: requestsLogEntry.args.blockNumber as bigint,
-            requestTimestamp: requestsLogEntry.args.timestamp as bigint,
-            requestId: requestsLogEntry.args.requestId as bigint,
-            requestorAddress: requestsLogEntry.args.requestorAddress as string,
-        }
-
-        // search through responses log array, match with requests array on requestId and assign missing values
-        for (const responsesLogEntry of responsesLog) {
-
-            if ((responsesLogEntry.args.requestId as bigint).toString() === (requestsLogEntry.args.requestId as bigint).toString()) {
-                historyEntry.responseBlockNumber = responsesLogEntry.args.blockNumber as bigint
-                historyEntry.responseTimestamp = responsesLogEntry.args.timestamp as bigint
-                historyEntry.randomNumber = responsesLogEntry.args.randomNumber as bigint
+            if (responsesLogEntry.args.requestId as bigint === requestsLogEntry.args.requestId as bigint) {
+                history.value.unshift({
+                    requestId: requestsLogEntry.args.requestId as bigint,
+                    requestBlockNumber: requestsLogEntry.args.blockNumber as bigint,
+                    requestTimestamp: requestsLogEntry.args.timestamp as bigint,
+                    requestorAddress: requestsLogEntry.args.requestorAddress as string,
+                    responseBlockNumber: responsesLogEntry.args.blockNumber as bigint,
+                    responseTimestamp: responsesLogEntry.args.timestamp as bigint,
+                    randomNumber: responsesLogEntry.args.randomNumber as bigint,
+                } satisfies HistoryEntry)
 
                 break
             }
         }
-
-        history.value.unshift(historyEntry)
     }
 }
 
