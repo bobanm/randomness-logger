@@ -3,9 +3,9 @@
 import { ref } from 'vue'
 import type { HistoryEntry } from '../types'
 
-const props = defineProps({
-    history: Array<HistoryEntry>
-})
+const props = defineProps<{
+    history: HistoryEntry[]
+}>()
 
 const displayRowOptions = [5, 10, 20, 100]
 let rowCount = ref<number>(5)
