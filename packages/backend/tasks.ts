@@ -65,14 +65,21 @@ export const send = task('send', 'Sends ETH from the primary account to another 
 
 export const deploy = task('deploy', 'Deploy a contract')
     .addOption({ name: 'contract', description: 'Contract name', defaultValue: '' })
+    .addOption({ name: 'subscription-id', description: 'VRF subscription ID (constructor arg)', defaultValue: '' })
     .setInlineAction(async (args, hre) => {
         if (!args.contract) {
             console.error('Error: --contract is required')
+
+            return
+        }
+        if (!args['subscription-id']) {
+            console.error('Error: --subscription-id is required')
+
             return
         }
         const { ethers } = await hre.network.create()
         const contractFactory = await ethers.getContractFactory(args.contract)
-        const contract = await contractFactory.deploy()
+        const contract = await contractFactory.deploy(args['subscription-id'])
 
         const address = await contract.getAddress()
         const tx = contract.deploymentTransaction()
