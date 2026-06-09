@@ -120,9 +120,8 @@ function getHistoryEntry (requestId: bigint): HistoryEntry | undefined {
 
 async function initAccount () {
 
-    const accounts = await browserProvider!.send('eth_requestAccounts', [])
-    accountAddress.value = accounts[0]!
     const signer = await browserProvider!.getSigner()
+    accountAddress.value = await signer.getAddress()
     RandomnessLoggerWriter = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
     registerEventListeners()
 }
