@@ -1,5 +1,5 @@
 import hre from 'hardhat'
-import { CONTRACT_NAME, VRF_SUBSCRIPTION_ID } from '../../../app.config'
+import { CONTRACT_NAME, VRF_SUBSCRIPTION_ID } from '../../../config/app.config'
 
 const { ethers } = await hre.network.create()
 

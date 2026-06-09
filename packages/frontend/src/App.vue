@@ -3,7 +3,7 @@
 import { ref, onMounted } from 'vue'
 import { ethers } from 'ethers'
 import '@randomness-logger/shared'
-import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED, INFURA_SEPOLIA_URL, Network } from '../../../app.config'
+import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED, INFURA_SEPOLIA_URL, Network } from '../../../config/app.config'
 import type { HistoryEntry } from './types'
 
 import Status from './components/Status.vue'

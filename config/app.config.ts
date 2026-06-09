@@ -1,4 +1,4 @@
-import { INFURA_API_KEY } from './config/credentials'
+import { INFURA_API_KEY } from './credentials'
 
 // all network-specific values are for Sepolia testnet
 export const CONTRACT_NAME = 'RandomnessLogger'

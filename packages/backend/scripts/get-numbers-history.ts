@@ -1,7 +1,7 @@
 import hre from 'hardhat'
 
 import '@randomness-logger/shared'
-import { CONTRACT_ADDRESS, CONTRACT_NAME, CONTRACT_BLOCK_DEPLOYED } from '../../../app.config'
+import { CONTRACT_ADDRESS, CONTRACT_NAME, CONTRACT_BLOCK_DEPLOYED } from '../../../config/app.config'
 
 type HistoryEntry = {
     requestBlockNumber: bigint,

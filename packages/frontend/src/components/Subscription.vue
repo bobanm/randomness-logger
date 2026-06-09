@@ -3,7 +3,7 @@
 import { ethers } from 'ethers'
 import { ref } from 'vue';
 import type { Ref } from 'vue'
-import { Network, VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, VRF_SUBSCRIPTION_ID } from '../../../../app.config';
+import { Network, VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, VRF_SUBSCRIPTION_ID } from '../../../../config/app.config';
 
 type Subscription = {
     owner: string,
