@@ -12,7 +12,7 @@ type Subscription = {
     consumers: string[],
 }
 
-const infuraProvider = inject('infuraProvider') as ethers.JsonRpcProvider
+const cloudProvider = inject('cloudProvider') as ethers.JsonRpcProvider
 
 let subscription: Ref<Subscription> = ref({
     owner: '',
@@ -21,7 +21,7 @@ let subscription: Ref<Subscription> = ref({
     consumers: [],
 })
 
-const VrfContract = new ethers.Contract(VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, infuraProvider)
+const VrfContract = new ethers.Contract(VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, cloudProvider)
 // do not await update, so that the component renders immediately with empty values
 update()
 

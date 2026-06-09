@@ -1,68 +1,68 @@
 ![2022-07-10 00_05_14](https://user-images.githubusercontent.com/2560022/178125279-4620a6f3-e5dd-48b0-924c-71a2761d21b8.png)
 
-What is this all about?
------------------------
+## What is this all about?
 
-This is a demo of Chainlink VRF v2 oracle. The app alows a user to browse all the random numbers
-previously obtained using its smart contract. If connected to Sepolia test network, a user can also
-request a new random number from the oracle.
+This is a demo of Chainlink VRF v2 oracle. The app alows a user to browse all the random numbers previously obtained using its smart contract. If connected to Sepolia test network, a user can also request a new random number from the oracle.
 
-The demo consists of 2 packages:
+The demo consists of 3 packages:
 
 1. `backend`, which defines the smart contract and its interaction with Chainlink oracle
 1. `frontend`, which reads random numbers history and allows a user to request a new random number
+1. `shared`, a tiny amount of shared logic, used by both backend and frontend
 
-The history of obtained random numbers is not stored in the contract state. Once obtained, the
-contract records them on the chain log. Then the frontend queries the log to fetch the numbers.
+The history of obtained random numbers is not stored in the contract state. Once obtained, the contract records them in the blockchain log. Then the frontend queries the log to fetch the numbers.
 
 There are 2 reasons for that design decision:
 
 1. After obtaining a random number, the smart contract never needs it again
 1. The only user of all the previous random numbers is the frontend
 
-Knowing those requirements, and having in mind that storing data in log requires less gas than
-storing data in smart contract storage, I've decided to use the log for this specific case. I know,
-I know... it doesn't make any sense that a smart contract goes through all the hassle of securely
-requesting a random number from an oracle, and then do nothing with that, but let an off-chain
-frontend to query the data from a log which is accessible only off-chain. In that case, I could
-make it all more simple, forget about oracles and generate random numbers off-chain.
+Knowing those requirements, and having in mind that storing data in log requires less gas than storing data in smart contract storage, I've decided to use the log for this specific case. Infura is our current infrastructure provider of choice. Unlike many other providers, Infura does not impose limits on how many blocks in the past it lets you to query the blockchain.
 
-Keep in mind that this is a demo of how to request a random number from an oracle using Chainlink
-VRF v2, not a demo of what a smart contract could do with a random number, once it gets it 🙂
+I know what you are thinking: It doesn't make any sense that a smart contract goes through all the hassle of securely requesting a random number from an oracle, and then do nothing with that, but let an off-chain frontend to query the data from a log which is accessible only off-chain. In that case, I could make it all more simple, forget about oracles and generate random numbers off-chain.
 
+Keep in mind that this is a demo of how to request a random number from an oracle using Chainlink VRF v2, not a demo of what a smart contract could do with a random number, once it gets it 🙂
 
-Where can I see it in action?
------------------------------
+### Where can I see it in action?
 
-To access the app, go to https://boban.ninja/randomness
+To access the app, go to https://randomness.boban.ninja
 
-The contract is currently deployed only on Sepolia, but you can deploy it to other
-networks where [Chainlink VRF v2 Aggregator contract](https://vrf.chain.link/) is deployed.
+The contract is currently deployed only on Sepolia, but you can deploy it to other networks where [Chainlink VRF v2 Aggregator contract](https://vrf.chain.link/) is deployed.
 
 
-Technologies used
------------------
+## Deploy it yourself
 
-I could never do this without the other amazing open-source projects. Here are the major
-technologies I used. Definitely my favorite stack:
+The best way to learn something is to do it yourself. Besides using my hosted instance, you are more than welcome to use the code from this repo to deploy your own version of smart contract and frontend. If you love to play with Hardhat, TypeScript and Vue.js, you're going to enjoy this.
 
-- [Solidity](https://github.com/ethereum/solidity)
-- [TypeScript](https://github.com/microsoft/TypeScript)
-- [Ethers.js](https://github.com/ethers-io/ethers.js)
-- [Hardhat](https://github.com/NomicFoundation/hardhat)
-- [Vue.js](https://github.com/vuejs/core)
-- [Vite](https://github.com/vitejs/vite)
+### Credentials
 
+#### API key safety
 
-Deploy it yourself
-------------------
+Since the API key needs to be added to `config/credentials.ts` and will be exposed on the frontend, every user will be able to see them and reuse them. It is a free key, but to prevent a malicious user from draining the key and disabling the app from getting data from Infura, it is recommended to restrict the key on Infura and limit the origin to your own domain.
 
-The best way to learn something is to do it yourself. Besides using my hosted instance, you are
-more than welcome to use the code from this repo to deploy your own version of smart contract and
-frontend. If you love to play with Hardhat, TypeScript and Vue.js, you're going to enjoy this.
+Hardhat 3 uses `configVariable()` to read sensitive values, which supports two approaches:
 
+#### 1. Environment variables (recommended for development)
 
-**BACKEND**
+Set these in your shell or a `.env` file (make sure `.env` is in `.gitignore`):
+
+```bash
+export SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/YOUR_INFURA_API_KEY
+export PRIVATE_KEY=0xYOUR_PRIVATE_KEY
+export ETHERSCAN_API_KEY=YOUR_ETHERSCAN_KEY
+```
+
+#### 2. Hardhat Keystore (recommended for production)
+
+Store encrypted values on disk:
+
+```bash
+bun hardhat keystore set SEPOLIA_RPC_URL
+bun hardhat keystore set PRIVATE_KEY
+bun hardhat keystore set ETHERSCAN_API_KEY
+```
+
+### Backend
 
 For Chainlink VRF v2 to work, you will have to create a subscription with Chainlink:
 
@@ -70,8 +70,7 @@ https://vrf.chain.link/sepolia/new
 
 Once you have your subscription ID, you are ready to deploy the smart contract.
 
-The deploy script needs VRF subscription ID. You will need to replace the value of
-`VRF_SUBSCRIPTION_ID` in `app.config.ts` file, located in project root folder.
+The deploy script needs VRF subscription ID. You will need to replace the value of `VRF_SUBSCRIPTION_ID` in `app.config.ts` file, located in project root folder.
 
 Once that is completed, it is time to deploy the Randomness smart contract:
 
@@ -80,17 +79,13 @@ cd ./packages/backend
 bun hardhat run ./scripts/deploy.ts --network sepolia
 ```
 
-Once the process is completed, you will have an address of your newly deployed contract. Head back
-to VRF subscription page to make your newly deployed contract a consumer of the subscription.
+Once the process is completed, you will have an address of your newly deployed contract. Head back to VRF subscription page to make your newly deployed contract a consumer of the subscription.
 
-Once you are there, you can fund your subscription with LINK, which is how you pay to Chainlink for
-using their service. If you need Sepolia LINK token, you can get it from Chainlink faucet:
+Once you are there, you can fund your subscription with LINK, which is how you pay to Chainlink for using their service. If you need Sepolia LINK token, you can get it from Chainlink faucet:
 
 https://faucets.chain.link/
 
-By now you also know in which block the contract has been deployed. Our app uses that info when it
-requests the history of random numbers. It doesn't make sense to query blockchain for events in
-blocks earlier than the block where our contract was deployed.
+By now you also know in which block the contract has been deployed. Our app uses that info when it requests the history of random numbers. It doesn't make sense to query blockchain for events in blocks earlier than the block where our contract was deployed.
 
 To set the starting block used by search query, go back to `app.config.ts` and update the value of
 `CONTRACT_BLOCK_DEPLOYED` param.
@@ -101,86 +96,42 @@ Besides deploy script, `scripts` folder also includes a few CLI scripts, which y
 1. `get-numbers-history` -- reads the logs and shows the details of all previous requests
 1. `request-random-number` -- make your request here, if you don't like the web frontend
 
-Yeah, you will also need to install dependencies using `bun` or any other Node package manager of
-your choice, but unlike all the other guides, I will skip that part. If you reached this point in
-documentation, you definitely don't need me to hold your hand while you're installing project
-dependencies 😀
+Yeah, you will also need to install dependencies using `bun` or any other Node package manager of your choice, but unlike all the other guides, I will skip that part. If you reached this point in documentation, you definitely don't need me to hold your hand while you're installing project dependencies 😀
 
 You can execute a script through Hardhat, like in example below:
 
+```bash
+bun hardhat run ./scripts/get-numbers-history.ts --network sepolia
 ```
-bun hardhat run .\scripts\get-numbers-history.ts --network sepolia
-```
 
-**FRONTEND**
+### Frontend
 
-This project uses Vue3 SFC via the new Composition API _script setup_, which is way cooler than
-using Composition API the old way using _setup function_, and not to mention the bloated legacy
-Options API. Once you try script setup, you will never look at the other ways to use Vue3 😀
+This project uses Vue3 SFC via the new Composition API _script setup_, which is way cooler than using Composition API the old way using _setup function_, and not to mention the bloated legacy Options API. Once you try script setup, you will never look at the other ways to use Vue3 😀
 
-For development server and build process, I used Vite, and I can highly recommend it. If you're
-still using vue-cli and webpack, I'm sure you will be impressed by how fast and elegant Vite is.
+For development server and build process, I used Vite, and I can highly recommend it. If you're still using vue-cli and webpack, I'm sure you will be impressed by how fast and elegant Vite is.
 
-To start the frontend in development mode on a local web server, while having Vite installed as a
-global dependency, simply run.
+To start the frontend in development mode on a local web server, while having Vite installed as a global dependency, simply run.
 
 ```bash
 vite
 ```
 
-If Vite is installed as a local dependency, you'll have to be just a little bit more verbose and
-prefix it with your package manager of your choice. I choose `bun`.
+If Vite is installed as a local dependency, you'll have to be just a little bit more verbose and prefix it with your package manager of your choice. I choose `bun`.
 
 ```bash
 bun vite
 ```
 
-Before starting a build process, it is a good idea to check for any TypeScript errors in the code.
-This script is very handy:
+Before starting a build process, it is a good idea to check for any TypeScript errors in the code. This script is very handy:
 
 ```bash
 bun run build
 ```
 
-It will first check your TypeScript code with `tsc` and then build the frontend files to `./dist`
-folder.
+It will first check your TypeScript code with `tsc` and then build the frontend files to `./dist` folder.
 
 Before deploying the frontend, you might want to try out the newly built bundle by using:
 
 ```bash
 bun vite preview
-```
-
-## Credentials
-
-Hardhat 3 uses `configVariable()` to read sensitive values, which supports two approaches:
-
-### 1. Environment variables (recommended for development)
-
-Set these in your shell or a `.env` file (make sure `.env` is in `.gitignore`):
-
-```bash
-export SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR_KEY
-export PRIVATE_KEY=0xYOUR_PRIVATE_KEY
-export ETHERSCAN_API_KEY=YOUR_ETHERSCAN_KEY
-```
-
-### 2. Hardhat Keystore (recommended for production)
-
-Store encrypted values on disk:
-
-```bash
-bun hardhat keystore set SEPOLIA_RPC_URL
-bun hardhat keystore set PRIVATE_KEY
-bun hardhat keystore set ETHERSCAN_API_KEY
-```
-
-These keys are **not** used by:
-- the frontend app, which relies on your Web3 wallet to obtain provider and signer
-- CLI scripts or tests if you run them on in-memory blockchain, which is the default Hardhat behavior
-
-These keys are used only when you explicitly request to run CLI scripts or tests on an external network, e.g.:
-
-```bash
-bun hardhat run ./scripts/get-numbers-history.ts --network sepolia
 ```

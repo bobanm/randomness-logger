@@ -1,5 +1,3 @@
-import { INFURA_API_KEY } from './credentials'
-
 // all network-specific values are for Sepolia testnet
 export const CONTRACT_NAME = 'RandomnessLogger'
 export const CONTRACT_ADDRESS = '0x07F4F9173866c2b2F59605ff4119d9a553545A98'
@@ -14,8 +12,6 @@ export enum Network {
     NAME = 'sepolia',
     ID = 11155111,
 }
-
-export const INFURA_SEPOLIA_URL = `https://sepolia.infura.io/v3/${INFURA_API_KEY}`
 
 export const VRF_SUBSCRIPTION_ID = 11405
 export const VRF_CONTRACT_ADDRESS = '0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625'

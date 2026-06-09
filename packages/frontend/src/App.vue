@@ -3,7 +3,8 @@
 import { ref, onMounted, provide } from 'vue'
 import { ethers } from 'ethers'
 import '@randomness-logger/shared'
-import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED, INFURA_SEPOLIA_URL, Network } from '../../../config/app.config'
+import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED, Network } from '../../../config/app.config'
+import { SEPOLIA_URL } from '../../../config/credentials'
 import type { HistoryEntry } from './types'
 
 import Status from './components/Status.vue'
@@ -11,8 +12,8 @@ import Subscription from './components/Subscription.vue'
 import History from './components/History.vue'
 import Error from './components/Error.vue'
 
-const infuraProvider = new ethers.JsonRpcProvider(INFURA_SEPOLIA_URL)
-provide('infuraProvider', infuraProvider)
+const cloudProvider = new ethers.JsonRpcProvider(SEPOLIA_URL)
+provide('cloudProvider', cloudProvider)
 
 let browserProvider: ethers.BrowserProvider | undefined
 let RandomnessLoggerReader: ethers.Contract
@@ -47,9 +48,9 @@ async function init () {
     isRequestFulfilled.value = false
     isReadOnly.value = true
 
-    RandomnessLoggerReader = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, infuraProvider)
+    RandomnessLoggerReader = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, cloudProvider)
 
-    const providerNetwork = await infuraProvider.getNetwork()
+    const providerNetwork = await cloudProvider.getNetwork()
 
     if (Number(providerNetwork.chainId) !== Network.ID) {
         errorMessage.value = 'The smart contract is currently deployed only on Sepolia network. Please switch your wallet to Sepolia.'

@@ -7,4 +7,4 @@
 
 */
 
-export const INFURA_API_KEY = '11111111111111111111111111111111'
+export const SEPOLIA_URL = `https://sepolia.infura.io/v3/11111111111111111111111111111111`
