@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ref, onMounted, provide } from 'vue'
+import { ref, onMounted, onUnmounted, provide } from 'vue'
 import { ethers } from 'ethers'
 import '@randomness-logger/shared'
 import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED, Network } from '../../../config/app.config'
@@ -29,14 +29,23 @@ const isRequestFulfilled = ref(false)
 
 const subscription = ref<InstanceType<typeof Subscription> | null>(null)
 
+const onChainChanged = async () => { await init() }
+const onAccountsChanged = async () => { await initAccount() }
+
 onMounted(async () => {
 
     await init()
 
     if (!isReadOnly.value) {
-        window.ethereum.on('chainChanged', () => { init() })
-        window.ethereum.on('accountsChanged', () => { initAccount() })
+        window.ethereum.on('chainChanged', onChainChanged)
+        window.ethereum.on('accountsChanged', onAccountsChanged)
     }
+})
+
+onUnmounted(() => {
+
+    window.ethereum?.removeListener('chainChanged', onChainChanged)
+    window.ethereum?.removeListener('accountsChanged', onAccountsChanged)
 })
 
 async function init () {
@@ -122,6 +131,7 @@ async function initAccount () {
 
     const signer = await browserProvider!.getSigner()
     accountAddress.value = await signer.getAddress()
+    RandomnessLoggerWriter?.removeAllListeners()
     RandomnessLoggerWriter = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
     registerEventListeners()
 }
