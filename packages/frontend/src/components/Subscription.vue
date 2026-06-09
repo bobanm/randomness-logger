@@ -1,30 +1,30 @@
 <script setup lang="ts">
 
-import { ethers, providers, BigNumber } from 'ethers'
+import { ethers } from 'ethers'
 import { ref } from 'vue';
 import type { Ref } from 'vue'
 import { Network, VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, VRF_SUBSCRIPTION_ID } from '../../../../app.config';
 
 type Subscription = {
     owner: string,
-    balance: BigNumber,
-    reqCount: BigNumber,
+    balance: bigint,
+    reqCount: bigint,
     consumers: string[],
 }
 
-let provider: providers.Web3Provider
+let provider: ethers.BrowserProvider | ethers.AbstractProvider
 let subscription: Ref<Subscription> = ref({
     owner: '',
-    balance: BigNumber.from(0),
-    reqCount: BigNumber.from(0),
+    balance: 0n,
+    reqCount: 0n,
     consumers: [],
 })
 
 if (window.ethereum) {
-    provider = new ethers.providers.Web3Provider(window.ethereum)
+    provider = new ethers.BrowserProvider(window.ethereum)
 }
 else {
-    provider = ethers.providers.getDefaultProvider(Network.NAME) as providers.Web3Provider
+    provider = ethers.getDefaultProvider(Network.NAME)
 }
 
 const VrfContract = new ethers.Contract(VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, provider)
@@ -46,7 +46,7 @@ defineExpose({ update })
     <h2>Subscription {{ VRF_SUBSCRIPTION_ID }}</h2>
     <div>
         Owner {{ subscription.owner }}<br/>
-        Remaining balance {{ Number(ethers.utils.formatUnits(subscription.balance)).toPrecision(6) }} LINK<br/>
+        Remaining balance {{ Number(ethers.formatUnits(subscription.balance)).toPrecision(6) }} LINK<br/>
         Fulfilled {{ subscription.reqCount.toString() }} requests
     </div>
 </section>

@@ -4,18 +4,20 @@
     "description": "Frontend for the smart contract that uses Chainlink services.",
     "scripts": {
         "dev": "vite",
+        "preview": "vite preview",
         "build": "vue-tsc --noEmit && vite build",
-        "preview": "vite preview"
+        "typecheck": "vue-tsc --noEmit"
     },
     "dependencies": {
         "@bobanm/cardinal": "^0.0.8",
-        "ethers": "5.7.1",
-        "vue": "3.2.39"
+        "@randomness-logger/shared": "workspace:*",
+        "ethers": "^6.16.0",
+        "vue": "^3.5.35"
     },
     "devDependencies": {
-        "@vitejs/plugin-vue": "3.1.0",
-        "typescript": "4.8.3",
-        "vite": "3.1.3",
-        "vue-tsc": "0.40.13"
+        "@vitejs/plugin-vue": "^6.0.7",
+        "typescript": "^6.0.3",
+        "vite": "^8.0.16",
+        "vue-tsc": "^3.3.4"
     }
 }

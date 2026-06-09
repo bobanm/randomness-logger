@@ -2,6 +2,11 @@ declare global {
     interface String {
         ellipsify(startLength: number, endLength: number): string
     }
+
+    interface Number {
+        toDateString(): string
+    }
+
     interface Date {
         toNiceString(): string
     }
@@ -11,7 +16,12 @@ String.prototype.ellipsify = function (this: string, startLength: number, endLen
     if (startLength + endLength >= this.length) {
         return this
     }
+
     return this.substring(0, startLength) + '...' + this.substring(this.length - endLength)
+}
+
+Number.prototype.toDateString = function (this: number): string {
+    return new Date(this * 1000).toNiceString()
 }
 
 Date.prototype.toNiceString = function (this: Date): string {
@@ -19,6 +29,7 @@ Date.prototype.toNiceString = function (this: Date): string {
     const MM = (this.getMonth() + 1).toString().padStart(2, '0')
     const DD = this.getDate().toString().padStart(2, '0')
     const time = this.toTimeString().substring(0, 8)
+
     return `${YYYY}-${MM}-${DD} ${time}`
 }
 

@@ -1,6 +1,6 @@
 import hre from 'hardhat'
 
-import '../utils/prototypes'
+import '@randomness-logger/shared'
 import { CONTRACT_ADDRESS, CONTRACT_NAME, CONTRACT_BLOCK_DEPLOYED } from '../../../app.config'
 
 type HistoryEntry = {

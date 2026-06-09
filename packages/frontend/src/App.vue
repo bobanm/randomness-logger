@@ -1,18 +1,19 @@
 <script setup lang="ts">
 
 import { ref, onMounted } from 'vue'
-import { ethers, Contract, BigNumber, providers, ContractTransaction } from 'ethers'
+import { ethers } from 'ethers'
+import '@randomness-logger/shared'
 import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED, Network } from '../../../app.config'
-import './globals'
+import type { HistoryEntry } from './types'
 
 import Status from './components/Status.vue'
 import Subscription from './components/Subscription.vue'
 import History from './components/History.vue'
 import Error from './components/Error.vue'
 
-let provider: providers.Web3Provider
-let signer
-let RandomnessLogger: Contract
+let provider: ethers.BrowserProvider | ethers.AbstractProvider
+let signer: ethers.JsonRpcSigner
+let RandomnessLogger: ethers.Contract
 
 const accountAddress = ref('')
 const history = ref<HistoryEntry[]>([])
@@ -43,17 +44,17 @@ async function init () {
     isRequestFulfilled.value = false
 
     if (window.ethereum) {
-        provider = new ethers.providers.Web3Provider(window.ethereum)
+        provider = new ethers.BrowserProvider(window.ethereum)
         isReadOnly.value = false
     }
     else {
-        provider = ethers.providers.getDefaultProvider(Network.NAME) as providers.Web3Provider
+        provider = ethers.getDefaultProvider(Network.NAME)
         isReadOnly.value = true
     }
 
     const providerNetwork = await provider.getNetwork()
 
-    if (providerNetwork.chainId !== Network.ID) {
+    if (Number(providerNetwork.chainId) !== Network.ID) {
         errorMessage.value = 'The smart contract is currently deployed only on Sepolia network. Please switch your wallet to Sepolia.'
 
         return
@@ -70,7 +71,7 @@ async function init () {
 
 function registerEventListeners () {
 
-    RandomnessLogger.on('NumberRequested', (requestId: BigNumber, requestBlockNumber: BigNumber, requestTimestamp: BigNumber, requestorAddress: string) => {
+    RandomnessLogger.on('NumberRequested', (requestId: bigint, requestBlockNumber: bigint, requestTimestamp: bigint, requestorAddress: string) => {
 
         const newHistoryEntry: HistoryEntry = {
             requestId,
@@ -87,7 +88,7 @@ function registerEventListeners () {
         }
     })
 
-    RandomnessLogger.on('NumberReceived', async (requestId: BigNumber, responseBlockNumber: BigNumber, responseTimestamp: BigNumber, randomNumber: BigNumber) => {
+    RandomnessLogger.on('NumberReceived', async (requestId: bigint, responseBlockNumber: bigint, responseTimestamp: bigint, randomNumber: bigint) => {
 
         for (const historyEntry of history.value) {
 
@@ -109,7 +110,7 @@ function registerEventListeners () {
     })
 }
 
-function getHistoryEntry (requestId: BigNumber): HistoryEntry | undefined {
+function getHistoryEntry (requestId: bigint): HistoryEntry | undefined {
 
     for (const historyEntry of history.value) {
         if (historyEntry.requestId.toString() === requestId.toString()) {
@@ -121,10 +122,10 @@ function getHistoryEntry (requestId: BigNumber): HistoryEntry | undefined {
 
 async function initAccount () {
 
-    const accounts = await provider.send('eth_requestAccounts', [])
-    accountAddress.value = accounts[0]
-    signer = provider.getSigner()
-    RandomnessLogger = RandomnessLogger.connect(signer)
+    const accounts = await (provider as ethers.BrowserProvider).send('eth_requestAccounts', [])
+    accountAddress.value = accounts[0]!
+    signer = await (provider as ethers.BrowserProvider).getSigner()
+    RandomnessLogger = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
 }
 
 async function fetchHistory () {
@@ -135,24 +136,24 @@ async function fetchHistory () {
     const [requestsLog, responsesLog] = await Promise.all([
         RandomnessLogger.queryFilter(filterRequests, CONTRACT_BLOCK_DEPLOYED),
         RandomnessLogger.queryFilter(filterResponses, CONTRACT_BLOCK_DEPLOYED),
-    ])
+    ]) as [ethers.EventLog[], ethers.EventLog[]]
 
     for (const requestsLogEntry of requestsLog) {
 
         const historyEntry: HistoryEntry = {
-            requestBlockNumber: requestsLogEntry.args!.blockNumber,
-            requestTimestamp: requestsLogEntry.args!.timestamp,
-            requestId: requestsLogEntry.args!.requestId,
-            requestorAddress: requestsLogEntry.args!.requestorAddress,
+            requestBlockNumber: requestsLogEntry.args.blockNumber as bigint,
+            requestTimestamp: requestsLogEntry.args.timestamp as bigint,
+            requestId: requestsLogEntry.args.requestId as bigint,
+            requestorAddress: requestsLogEntry.args.requestorAddress as string,
         }
 
         // search through responses log array, match with requests array on requestId and assign missing values
         for (const responsesLogEntry of responsesLog) {
 
-            if (responsesLogEntry.args!.requestId.toString() === requestsLogEntry.args!.requestId.toString()) {
-                historyEntry.responseBlockNumber = responsesLogEntry.args!.blockNumber
-                historyEntry.responseTimestamp = responsesLogEntry.args!.timestamp
-                historyEntry.randomNumber = responsesLogEntry.args!.randomNumber
+            if ((responsesLogEntry.args.requestId as bigint).toString() === (requestsLogEntry.args.requestId as bigint).toString()) {
+                historyEntry.responseBlockNumber = responsesLogEntry.args.blockNumber as bigint
+                historyEntry.responseTimestamp = responsesLogEntry.args.timestamp as bigint
+                historyEntry.randomNumber = responsesLogEntry.args.randomNumber as bigint
 
                 break
             }
@@ -168,7 +169,7 @@ async function requestRandomNumber () {
     responseMessages.value.length = 0
     isRequestFulfilled.value = false
 
-    const transaction: ContractTransaction = await RandomnessLogger.requestRandomNumber()
+    const transaction = await RandomnessLogger.requestRandomNumber()
     requestMessages.value.push(
         `Requested a random number`,
         `Transaction ${transaction.hash}`,
@@ -176,11 +177,23 @@ async function requestRandomNumber () {
     )
     const receipt = await transaction.wait()
 
-    responseMessages.value.push(
-        `Confirmed in block ${receipt.events![1].args!.blockNumber}`,
-        `Request ID ${receipt.events![1].args!.requestId}`,
-        `Chainlink VRF will fulfill it in about 3 blocks. Stay tuned...`,
-    )
+    if (receipt) {
+        const log = receipt.logs.find((log: ethers.Log) => {
+            const parsed = RandomnessLogger.interface.parseLog(log)
+
+            return parsed?.name === 'NumberRequested'
+        })
+
+        if (log) {
+            const parsed = RandomnessLogger.interface.parseLog(log)!
+
+            responseMessages.value.push(
+                `Confirmed in block ${parsed.args.blockNumber}`,
+                `Request ID ${parsed.args.requestId}`,
+                `Chainlink VRF will fulfill it in about 3 blocks. Stay tuned...`,
+            )
+        }
+    }
 }
 
 </script>

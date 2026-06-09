@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 import { ref } from 'vue'
+import type { HistoryEntry } from '../types'
 
 const props = defineProps({
     history: Array<HistoryEntry>
@@ -32,8 +33,8 @@ let rowCount = ref<number>(5)
             <tbody>
                 <tr v-for="i in Math.min(history.length, rowCount)" :key="i">
                     <td class="priority2">{{ history[i - 1].requestId.toString().ellipsify(7, 3) }}</td>
-                    <td class="priority1">{{ history[i - 1].requestTimestamp.toNumber().toDateString() }}</td>
-                    <td class="priority3">{{ history[i - 1].responseTimestamp?.toNumber().toDateString() ?? '' }}</td>
+                    <td class="priority1">{{ Number(history[i - 1].requestTimestamp).toDateString() }}</td>
+                    <td class="priority3">{{ history[i - 1].responseTimestamp != null ? Number(history[i - 1].responseTimestamp).toDateString() : '' }}</td>
                     <td class="priority3">{{ history[i - 1].requestBlockNumber.toString().padEnd(8) }}</td>
                     <td class="priority3">{{ history[i - 1].responseBlockNumber?.toString().padEnd(8) ?? '' }}</td>
                     <td class="priority2">{{ history[i - 1].requestorAddress.ellipsify(8, 3) }}</td>
