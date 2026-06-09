@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, provide } from 'vue'
 import { ethers } from 'ethers'
 import '@randomness-logger/shared'
 import { CONTRACT_ADDRESS, CONTRACT_ABI, CONTRACT_BLOCK_DEPLOYED, INFURA_SEPOLIA_URL, Network } from '../../../config/app.config'
@@ -11,7 +11,9 @@ import Subscription from './components/Subscription.vue'
 import History from './components/History.vue'
 import Error from './components/Error.vue'
 
-let infuraProvider: ethers.JsonRpcProvider
+const infuraProvider = new ethers.JsonRpcProvider(INFURA_SEPOLIA_URL)
+provide('infuraProvider', infuraProvider)
+
 let browserProvider: ethers.BrowserProvider | undefined
 let RandomnessLoggerReader: ethers.Contract
 let RandomnessLoggerWriter: ethers.Contract | undefined
@@ -45,7 +47,6 @@ async function init () {
     isRequestFulfilled.value = false
     isReadOnly.value = true
 
-    infuraProvider = new ethers.JsonRpcProvider(INFURA_SEPOLIA_URL)
     RandomnessLoggerReader = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, infuraProvider)
 
     const providerNetwork = await infuraProvider.getNetwork()

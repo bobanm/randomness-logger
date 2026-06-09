@@ -1,9 +1,9 @@
 <script setup lang="ts">
 
 import { ethers } from 'ethers'
-import { ref } from 'vue';
+import { ref, inject } from 'vue';
 import type { Ref } from 'vue'
-import { Network, VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, VRF_SUBSCRIPTION_ID } from '../../../../config/app.config';
+import { VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, VRF_SUBSCRIPTION_ID } from '../../../../config/app.config';
 
 type Subscription = {
     owner: string,
@@ -12,7 +12,8 @@ type Subscription = {
     consumers: string[],
 }
 
-let provider: ethers.BrowserProvider | ethers.AbstractProvider
+const infuraProvider = inject('infuraProvider') as ethers.JsonRpcProvider
+
 let subscription: Ref<Subscription> = ref({
     owner: '',
     balance: 0n,
@@ -20,15 +21,9 @@ let subscription: Ref<Subscription> = ref({
     consumers: [],
 })
 
-if (window.ethereum) {
-    provider = new ethers.BrowserProvider(window.ethereum)
-}
-else {
-    provider = ethers.getDefaultProvider(Network.NAME)
-}
-
-const VrfContract = new ethers.Contract(VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, provider)
-await update()
+const VrfContract = new ethers.Contract(VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, infuraProvider)
+// do not await update, so that the component renders immediately with empty values
+update()
 
 // update functionality is inside a method, so it could be invoked also by the parent component
 async function update() {
