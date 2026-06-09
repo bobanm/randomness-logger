@@ -1,6 +1,7 @@
 {
     "name": "randomness-logger-frontend",
     "version": "0.0.0",
+    "type": "module",
     "description": "Frontend for the smart contract that uses Chainlink services.",
     "scripts": {
         "dev": "vite",

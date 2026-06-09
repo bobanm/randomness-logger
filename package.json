@@ -1,6 +1,7 @@
 {
     "name": "randomness-logger",
     "version": "0.0.0",
+    "type": "module",
     "description": "Using Chainlink VRF v2, request a random number and/or browse history of all previously requested random numbers.",
     "keywords": [
         "Ethereum",
