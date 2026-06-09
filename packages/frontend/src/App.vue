@@ -57,22 +57,28 @@ async function init () {
     isRequestFulfilled.value = false
     isReadOnly.value = true
 
-    RandomnessLoggerReader = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, cloudProvider)
+    try {
+        RandomnessLoggerReader = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, cloudProvider)
 
-    const providerNetwork = await cloudProvider.getNetwork()
+        const providerNetwork = await cloudProvider.getNetwork()
 
-    if (Number(providerNetwork.chainId) !== Network.ID) {
-        errorMessage.value = 'The smart contract is currently deployed only on Sepolia network. Please switch your wallet to Sepolia.'
+        if (Number(providerNetwork.chainId) !== Network.ID) {
+            errorMessage.value = 'The smart contract is currently deployed only on Sepolia network. Please switch your wallet to Sepolia.'
 
-        return
+            return
+        }
+
+        history.value = await fetchHistory()
+
+        if (window.ethereum) {
+            browserProvider = new ethers.BrowserProvider(window.ethereum)
+            await initAccount()
+            isReadOnly.value = false
+        }
     }
-
-    history.value = await fetchHistory()
-
-    if (window.ethereum) {
-        browserProvider = new ethers.BrowserProvider(window.ethereum)
-        await initAccount()
-        isReadOnly.value = false
+    catch (error) {
+        console.error(error)
+        errorMessage.value = 'Failed to initialize. Please check your internet connection and try again.'
     }
 }
 

@@ -27,7 +27,12 @@ update()
 
 // update functionality is inside a method, so it could be invoked also by the parent component
 async function update() {
-    subscription.value = await VrfContract.getSubscription(VRF_SUBSCRIPTION_ID) as Subscription
+    try {
+        subscription.value = await VrfContract.getSubscription(VRF_SUBSCRIPTION_ID) as Subscription
+    }
+    catch (error) {
+        console.error('Failed to fetch subscription:', error)
+    }
 }
 
 defineExpose({ update })
