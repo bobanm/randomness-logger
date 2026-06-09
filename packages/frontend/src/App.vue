@@ -58,7 +58,7 @@ async function init () {
         return
     }
 
-    await fetchHistory()
+    history.value = await fetchHistory()
 
     if (window.ethereum) {
         browserProvider = new ethers.BrowserProvider(window.ethereum)
@@ -126,8 +126,9 @@ async function initAccount () {
     registerEventListeners()
 }
 
-async function fetchHistory () {
+async function fetchHistory (): Promise<HistoryEntry[]> {
 
+    const historyLog: HistoryEntry[] = []
     const filterRequests = RandomnessLoggerReader.filters.NumberRequested()
     const filterResponses = RandomnessLoggerReader.filters.NumberReceived()
 
@@ -141,7 +142,7 @@ async function fetchHistory () {
         for (const requestsLogEntry of requestsLog) {
 
             if (responsesLogEntry.args.requestId as bigint === requestsLogEntry.args.requestId as bigint) {
-                history.value.unshift({
+                historyLog.unshift({
                     requestId: requestsLogEntry.args.requestId as bigint,
                     requestBlockNumber: requestsLogEntry.args.blockNumber as bigint,
                     requestTimestamp: requestsLogEntry.args.timestamp as bigint,
@@ -155,6 +156,8 @@ async function fetchHistory () {
             }
         }
     }
+
+    return historyLog
 }
 
 async function requestRandomNumber () {
