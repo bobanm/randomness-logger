@@ -1,77 +1,71 @@
-import { ethers } from 'hardhat'
-import { BigNumber } from 'ethers'
+import hre from 'hardhat'
 
 import '../utils/prototypes'
 import { CONTRACT_ADDRESS, CONTRACT_NAME, CONTRACT_BLOCK_DEPLOYED } from '../../../app.config'
 
 type HistoryEntry = {
-    requestBlockNumber: BigNumber,
-    requestTimestamp: BigNumber,
-    requestId: BigNumber,
+    requestBlockNumber: bigint,
+    requestTimestamp: bigint,
+    requestId: bigint,
     requestorAddress: string,
-    responseBlockNumber?: BigNumber,
-    responseTimestamp?: BigNumber,
-    randomNumber?: BigNumber,
+    responseBlockNumber?: bigint,
+    responseTimestamp?: bigint,
+    randomNumber?: bigint,
 }
 
-async function main () {
+const { ethers } = await hre.network.create()
 
-    const RandomnessLogger = await ethers.getContractAt(CONTRACT_NAME, CONTRACT_ADDRESS)
+const RandomnessLogger = await ethers.getContractAt(CONTRACT_NAME, CONTRACT_ADDRESS)
 
-    const history: HistoryEntry[] = []
-    const filterRequests = RandomnessLogger.filters.NumberRequested()
-    const filterResponses = RandomnessLogger.filters.NumberReceived()
-    
-    console.log('\nQuerying the blockchain, please wait...\n')
+const history: HistoryEntry[] = []
+const filterRequests = RandomnessLogger.filters.NumberRequested()
+const filterResponses = RandomnessLogger.filters.NumberReceived()
 
-    const [requestsLog, responsesLog] = await Promise.all([
-        RandomnessLogger.queryFilter(filterRequests, CONTRACT_BLOCK_DEPLOYED),
-        RandomnessLogger.queryFilter(filterResponses, CONTRACT_BLOCK_DEPLOYED),
-    ])
+console.log('\nQuerying the blockchain, please wait...\n')
 
-    for (const requestsLogEntry of requestsLog) {
+const [requestsLog, responsesLog] = await Promise.all([
+    RandomnessLogger.queryFilter(filterRequests, CONTRACT_BLOCK_DEPLOYED),
+    RandomnessLogger.queryFilter(filterResponses, CONTRACT_BLOCK_DEPLOYED),
+])
 
-        const historyEntry: HistoryEntry = {
-            requestBlockNumber: requestsLogEntry.args!.blockNumber,
-            requestTimestamp: requestsLogEntry.args!.timestamp,
-            requestId: requestsLogEntry.args!.requestId,
-            requestorAddress: requestsLogEntry.args!.requestorAddress,
-        }
-        
-        // search through responses log array, match with requests array on requestId and assign missing values
-        for (const responsesLogEntry of responsesLog) {
+for (const requestsLogEntry of requestsLog) {
+    if (!('args' in requestsLogEntry)) continue
+    const { args: reqArgs } = requestsLogEntry
 
-            if (responsesLogEntry.args!.requestId.toString() === requestsLogEntry.args!.requestId.toString()) {
-                historyEntry.responseBlockNumber = responsesLogEntry.args!.blockNumber
-                historyEntry.responseTimestamp = responsesLogEntry.args!.timestamp
-                historyEntry.randomNumber = responsesLogEntry.args!.randomNumber
-
-                break
-            }
-        }
-
-        history.push(historyEntry)
+    const historyEntry: HistoryEntry = {
+        requestBlockNumber: reqArgs.blockNumber,
+        requestTimestamp: reqArgs.timestamp,
+        requestId: reqArgs.requestId,
+        requestorAddress: reqArgs.requestorAddress,
     }
 
-    console.log('REQUEST ID      REQUEST DATE          RESPONSE DATE         REQ BLK    RESP BLK   REQUESTOR ADDR   RANDOM NUMBER')
-    console.log('-'.repeat(112))
+    for (const responsesLogEntry of responsesLog) {
+        if (!('args' in responsesLogEntry)) continue
+        const { args: resArgs } = responsesLogEntry
 
-    for (const historyEntry of history) {
-        const requestId = historyEntry.requestId.toString().ellipsify(7, 3)
-        const requestDate = new Date(historyEntry.requestTimestamp.toNumber() * 1000).toNiceString()
-        const responseDate = historyEntry.responseTimestamp ? new Date(historyEntry.responseTimestamp.toNumber() * 1000).toNiceString() : ''.padEnd(19)
-        const requestBlockNumber = historyEntry.requestBlockNumber.toString().padEnd(8)
-        const responseBlockNumber = historyEntry.responseBlockNumber?.toString().padEnd(8) ?? ''.padEnd(8)
-        const requestorAddress = historyEntry.requestorAddress.ellipsify(8, 3)
-        const randomNumber = historyEntry.randomNumber?.toString().ellipsify(7, 3) ?? ''
-        
-        console.log(`${requestId}   ${requestDate}   ${responseDate}   ${requestBlockNumber}   ${responseBlockNumber}   ${requestorAddress}   ${randomNumber}`)
+        if (resArgs.requestId.toString() === reqArgs.requestId.toString()) {
+            historyEntry.responseBlockNumber = resArgs.blockNumber
+            historyEntry.responseTimestamp = resArgs.timestamp
+            historyEntry.randomNumber = resArgs.randomNumber
+
+            break
+        }
     }
+
+    history.push(historyEntry)
 }
 
-main()
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error(error)
-        process.exit(1)
-    })
+console.log('REQUEST ID      REQUEST DATE          RESPONSE DATE         REQ BLK    RESP BLK   REQUESTOR ADDR   RANDOM NUMBER')
+console.log('-'.repeat(112))
+
+for (const historyEntry of history) {
+    const requestId = historyEntry.requestId.toString().ellipsify(7, 3)
+    const requestDate = new Date(Number(historyEntry.requestTimestamp) * 1000).toNiceString()
+    const responseDate = historyEntry.responseTimestamp ? new Date(Number(historyEntry.responseTimestamp) * 1000).toNiceString() : ''.padEnd(19)
+    const requestBlockNumber = historyEntry.requestBlockNumber.toString().padEnd(8)
+    const responseBlockNumber = historyEntry.responseBlockNumber?.toString().padEnd(8) ?? ''.padEnd(8)
+    const requestorAddress = historyEntry.requestorAddress.ellipsify(8, 3)
+    const randomNumber = historyEntry.randomNumber?.toString().ellipsify(7, 3) ?? ''
+
+    console.log(`${requestId}   ${requestDate}   ${responseDate}   ${requestBlockNumber}   ${responseBlockNumber}   ${requestorAddress}   ${randomNumber}`)
+}

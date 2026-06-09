@@ -1,58 +1,86 @@
 import { task } from 'hardhat/config'
 
-task('balance', 'Prints an account balance')
-    .addParam('address', 'The account address')
-    .setAction(async (args, hre) => {
-        const balance = await hre.ethers.provider.getBalance(args.address)
-        console.log(`${args.address} = ${hre.ethers.utils.formatEther(balance)} ETH`)
+export const balance = task('balance', 'Prints an account balance')
+    .addOption({ name: 'address', description: 'The account address', defaultValue: '' })
+    .setInlineAction(async (args, hre) => {
+        if (!args.address) {
+            console.error('Error: --address is required')
+            return
+        }
+        const { ethers } = await hre.network.create()
+        const balance = await ethers.provider.getBalance(args.address)
+        console.log(`${args.address} = ${ethers.formatEther(balance)} ETH`)
     })
+    .build()
 
-task('balances', 'Prints balances of all configured accounts')
-    .setAction(async (args, hre) => {
-        const accounts = await hre.ethers.getSigners()
+export const balances = task('balances', 'Prints balances of all configured accounts')
+    .setInlineAction(async (args, hre) => {
+        const { ethers } = await hre.network.create()
+        const signers = await ethers.getSigners()
 
-        if (!accounts.length) {
+        if (!signers.length) {
             console.log('No accounts detected. Configure them in your Hardhat config file.')
 
             return
         }
 
         console.log(
-            `${accounts.length} accounts configured\n\n` +
+            `${signers.length} accounts configured\n\n` +
             'ACCOUNT                                      BALANCE ETH\n' +
             '-----------------------------------------------------------------'
         )
-        for (const account of accounts) {
-            const balance = await hre.ethers.provider.getBalance(account.address)
-            console.log(`${account.address}   ${hre.ethers.utils.formatEther(balance)}`)
+        for (const signer of signers) {
+            const address = await signer.getAddress()
+            const balance = await ethers.provider.getBalance(address)
+            console.log(`${address}   ${ethers.formatEther(balance)}`)
         }
     })
+    .build()
 
-task('send', 'Sends ETH from the primary account to another account')
-    .addParam('address', 'Address of the receiver')
-    .addParam('amount', 'Amount in ETH')
-    .setAction(async (args, hre) => {
+export const send = task('send', 'Sends ETH from the primary account to another account')
+    .addOption({ name: 'address', description: 'Address of the receiver', defaultValue: '' })
+    .addOption({ name: 'amount', description: 'Amount in ETH', defaultValue: '' })
+    .setInlineAction(async (args, hre) => {
+        if (!args.address || !args.amount) {
+            console.error('Error: --address and --amount are required')
+            return
+        }
+        const { ethers } = await hre.network.create()
+        const [signer] = await ethers.getSigners()
 
-        const signer = hre.ethers.provider.getSigner()
+        if (!signer) {
+            console.log('No accounts configured.')
+            return
+        }
 
         const transactionSend = await signer.sendTransaction({
             to: args.address,
-            value: hre.ethers.utils.parseEther(String(args.amount))
+            value: ethers.parseEther(String(args.amount))
         })
         console.log(`transaction hash: ${transactionSend.hash}`)
         const receiptSend = await transactionSend.wait()
-        console.log(`mined in block: ${receiptSend.blockNumber}`)
+        console.log(`mined in block: ${receiptSend?.blockNumber}`)
     })
+    .build()
 
-task('deploy', 'Deploy a contract')
-    .addParam('contract', 'Contract name')
-    .setAction(async (args, hre) => {
-        const contractFactory = await hre.ethers.getContractFactory(args.contract)
+export const deploy = task('deploy', 'Deploy a contract')
+    .addOption({ name: 'contract', description: 'Contract name', defaultValue: '' })
+    .setInlineAction(async (args, hre) => {
+        if (!args.contract) {
+            console.error('Error: --contract is required')
+            return
+        }
+        const { ethers } = await hre.network.create()
+        const contractFactory = await ethers.getContractFactory(args.contract)
         const contract = await contractFactory.deploy()
-    
-        console.log(`Deploying contract ${contract.address}\n` +
-            `Transaction ${contract.deployTransaction.hash}\n`)
-        await contract.deployed()
-    
-        console.log('Contract successfully deployed');
+
+        const address = await contract.getAddress()
+        const tx = contract.deploymentTransaction()
+
+        console.log(`Deploying contract ${address}\n` +
+            `Transaction ${tx?.hash}\n`)
+        await contract.waitForDeployment()
+
+        console.log('Contract successfully deployed')
     })
+    .build()

@@ -77,7 +77,7 @@ Once that is completed, it is time to deploy the Randomness smart contract:
 
 ```bash
 cd ./packages/backend
-pnpm hardhat run ./scripts/deploy.ts --network sepolia
+bun hardhat run ./scripts/deploy.ts --network sepolia
 ```
 
 Once the process is completed, you will have an address of your newly deployed contract. Head back
@@ -101,11 +101,16 @@ Besides deploy script, `scripts` folder also includes a few CLI scripts, which y
 1. `get-numbers-history` -- reads the logs and shows the details of all previous requests
 1. `request-random-number` -- make your request here, if you don't like the web frontend
 
-Yeah, you will also need to install dependencies using `pnpm` or any other Node package manager of
+Yeah, you will also need to install dependencies using `bun` or any other Node package manager of
 your choice, but unlike all the other guides, I will skip that part. If you reached this point in
 documentation, you definitely don't need me to hold your hand while you're installing project
 dependencies 😀
 
+You can execute a script through Hardhat, like in example below:
+
+```
+bun hardhat run .\scripts\get-numbers-history.ts --network sepolia
+```
 
 **FRONTEND**
 
@@ -124,17 +129,17 @@ vite
 ```
 
 If Vite is installed as a local dependency, you'll have to be just a little bit more verbose and
-prefix it with your package manager of your choice. I choose `pnpm`.
+prefix it with your package manager of your choice. I choose `bun`.
 
 ```bash
-pnpm vite
+bun vite
 ```
 
 Before starting a build process, it is a good idea to check for any TypeScript errors in the code.
 This script is very handy:
 
 ```bash
-pnpm run build
+bun run build
 ```
 
 It will first check your TypeScript code with `tsc` and then build the frontend files to `./dist`
@@ -143,5 +148,39 @@ folder.
 Before deploying the frontend, you might want to try out the newly built bundle by using:
 
 ```bash
-pnpm vite preview
+bun vite preview
+```
+
+## Credentials
+
+Hardhat 3 uses `configVariable()` to read sensitive values, which supports two approaches:
+
+### 1. Environment variables (recommended for development)
+
+Set these in your shell or a `.env` file (make sure `.env` is in `.gitignore`):
+
+```bash
+export SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR_KEY
+export PRIVATE_KEY=0xYOUR_PRIVATE_KEY
+export ETHERSCAN_API_KEY=YOUR_ETHERSCAN_KEY
+```
+
+### 2. Hardhat Keystore (recommended for production)
+
+Store encrypted values on disk:
+
+```bash
+bun hardhat keystore set SEPOLIA_RPC_URL
+bun hardhat keystore set PRIVATE_KEY
+bun hardhat keystore set ETHERSCAN_API_KEY
+```
+
+These keys are **not** used by:
+- the frontend app, which relies on your Web3 wallet to obtain provider and signer
+- CLI scripts or tests if you run them on in-memory blockchain, which is the default Hardhat behavior
+
+These keys are used only when you explicitly request to run CLI scripts or tests on an external network, e.g.:
+
+```bash
+bun hardhat run ./scripts/get-numbers-history.ts --network sepolia
 ```

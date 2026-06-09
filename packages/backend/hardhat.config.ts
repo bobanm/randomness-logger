@@ -1,30 +1,27 @@
-import '@nomiclabs/hardhat-waffle'
-import '@nomiclabs/hardhat-etherscan'
-import { HardhatUserConfig } from 'hardhat/config'
+import { defineConfig, configVariable } from 'hardhat/config'
+import hardhatToolboxMochaEthers from '@nomicfoundation/hardhat-toolbox-mocha-ethers'
+import hardhatVerify from '@nomicfoundation/hardhat-verify'
+import { balance, balances, send, deploy } from './tasks'
 
-import './tasks'
-import { ALCHEMY_API_KEY, PRIVATE_KEYS, ETHERSCAN_API_KEY } from './.credentials'
-
-const config: HardhatUserConfig = {
-    solidity: '0.8.24',
-    etherscan: {
-        apiKey: ETHERSCAN_API_KEY,
-    },
-
+export default defineConfig({
+    plugins: [hardhatToolboxMochaEthers, hardhatVerify],
+    solidity: '0.8.35',
     networks: {
+        hardhatMainnet: {
+            type: 'edr-simulated',
+            chainType: 'l1',
+        },
         sepolia: {
-            url: `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
-            accounts: PRIVATE_KEYS,
+            type: 'http',
+            chainType: 'l1',
+            url: configVariable('SEPOLIA_RPC_URL'),
+            accounts: [configVariable('PRIVATE_KEY')],
         },
-        'optimism-sepolia': {
-            url: 'https://sepolia.optimism.io',
-            accounts: PRIVATE_KEYS,
+    },
+    verify: {
+        etherscan: {
+            apiKey: configVariable('ETHERSCAN_API_KEY'),
         },
-        'arbitrum-sepolia': {
-            url: 'https://sepolia-rollup.arbitrum.io/rpc/',
-            accounts: PRIVATE_KEYS,
-        },
-    }
-}
-
-export default config
+    },
+    tasks: [balance, balances, send, deploy],
+})

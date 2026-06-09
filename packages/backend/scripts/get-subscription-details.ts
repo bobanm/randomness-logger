@@ -1,35 +1,26 @@
-import { ethers } from 'hardhat'
-import { BigNumber } from 'ethers'
+import hre from 'hardhat'
 
 import { VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, VRF_SUBSCRIPTION_ID } from '../../../app.config'
 
-async function main () {
+const { ethers } = await hre.network.create()
 
-    type SubscriptionResponse = {
-        owner: string,
-        balance: BigNumber,
-        reqCount: BigNumber,
-        consumers: string[],
-    }
-
-    const Vrf = new ethers.Contract(VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, ethers.provider)
-    const subscription: SubscriptionResponse = await Vrf.getSubscription(VRF_SUBSCRIPTION_ID)
-
-    console.log(`owner      ${subscription.owner}`)
-    console.log(`balance    ${Number(ethers.utils.formatUnits(subscription.balance)).toPrecision(6)} LINK`)
-    console.log(`fulfilled  ${subscription.reqCount.toNumber()} requests`)
-    
-    if (subscription.consumers) {
-        console.log('\nconsumers')
-        for (const consumer of subscription.consumers) {
-            console.log(`  ${consumer}`)
-        }
-    }
+type SubscriptionResponse = {
+    owner: string,
+    balance: bigint,
+    reqCount: bigint,
+    consumers: string[],
 }
 
-main()
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error(error)
-        process.exit(1)
-    })
+const Vrf = new ethers.Contract(VRF_CONTRACT_ADDRESS, VRF_CONTRACT_ABI, ethers.provider)
+const subscription: SubscriptionResponse = await Vrf.getSubscription!(VRF_SUBSCRIPTION_ID)
+
+console.log(`owner      ${subscription.owner}`)
+console.log(`balance    ${Number(ethers.formatUnits(subscription.balance)).toPrecision(6)} LINK`)
+console.log(`fulfilled  ${Number(subscription.reqCount)} requests`)
+
+if (subscription.consumers) {
+    console.log('\nconsumers')
+    for (const consumer of subscription.consumers) {
+        console.log(`  ${consumer}`)
+    }
+}

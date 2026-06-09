@@ -1,22 +1,17 @@
-import { ethers } from 'hardhat'
-import { ContractTransaction } from 'ethers'
-
+import hre from 'hardhat'
 import { CONTRACT_NAME, CONTRACT_ADDRESS } from '../../../app.config'
 
-async function main () {
+const { ethers } = await hre.network.create()
 
-    const signer = ethers.provider.getSigner()
-    const RandomnessLogger = await ethers.getContractAt(CONTRACT_NAME, CONTRACT_ADDRESS, signer)
+const signers = await ethers.getSigners()
+const signer = signers[0]
+const RandomnessLogger = await ethers.getContractAt(CONTRACT_NAME, CONTRACT_ADDRESS, signer)
 
-    const transaction: ContractTransaction = await RandomnessLogger.requestRandomNumber()
-    console.log('Requested a random number. Waiting for the transaction to be mined...')
-    const receipt = await transaction.wait()
-    console.log(`Request ID = ${receipt.events![1].args!.requestId}`)
+const transaction = await RandomnessLogger.requestRandomNumber()
+console.log('Requested a random number. Waiting for the transaction to be mined...')
+const receipt = await transaction.wait()
+
+if (receipt && receipt.logs[1]) {
+    const parsedLog = RandomnessLogger.interface.parseLog(receipt.logs[1])
+    console.log(`Request ID = ${parsedLog!.args.requestId}`)
 }
-
-main()
-    .then(() => process.exit(0))
-    .catch((error) => {
-        console.error(error)
-        process.exit(1)
-    })
