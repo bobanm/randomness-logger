@@ -8,9 +8,7 @@
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
-    "verbatimModuleSyntax": true,
-    "paths": { "@/*": ["./src/*"] },
-    "jsx": "preserve"
+    "verbatimModuleSyntax": true
   },
-  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "vite.config.*", "src/app.d.ts"]
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue", "vite.config.*"]
 }
